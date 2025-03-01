@@ -6,6 +6,7 @@ import { Logo } from "@/components/Logo";
 import { mockProducts, mockCategories } from "@/lib/mockData";
 import { Product } from "@/types";
 import ProductTile from "@/components/ProductTile";
+import ProductDetailOverlay from "@/components/ProductDetailOverlay";
 import CategoryFilter from "@/components/CategoryFilter";
 import { ShoppingCart, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -58,6 +60,18 @@ const ProductsPage = () => {
   
   const handleSelectCategory = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
+  };
+  
+  const handleViewProductDetails = (product: Product) => {
+    setSelectedProduct(product);
+    // Prevent body scrolling when overlay is open
+    document.body.style.overflow = 'hidden';
+  };
+  
+  const handleCloseProductDetails = () => {
+    setSelectedProduct(null);
+    // Re-enable body scrolling when overlay is closed
+    document.body.style.overflow = '';
   };
   
   const handleLogout = async () => {
@@ -119,6 +133,7 @@ const ProductsPage = () => {
               product={product}
               onAddToCart={handleAddToCart}
               onBuyNow={handleBuyNow}
+              onViewDetails={handleViewProductDetails}
             />
           ))}
         </div>
@@ -131,6 +146,16 @@ const ProductsPage = () => {
           </div>
         )}
       </main>
+      
+      {/* Product Detail Overlay */}
+      {selectedProduct && (
+        <ProductDetailOverlay
+          product={selectedProduct}
+          onClose={handleCloseProductDetails}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+        />
+      )}
     </div>
   );
 };

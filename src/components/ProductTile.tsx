@@ -9,12 +9,14 @@ interface ProductTileProps {
   product: Product;
   onAddToCart: (product: Product) => void;
   onBuyNow: (product: Product) => void;
+  onViewDetails: (product: Product) => void;
 }
 
 const ProductTile: React.FC<ProductTileProps> = ({ 
   product, 
   onAddToCart, 
-  onBuyNow 
+  onBuyNow,
+  onViewDetails
 }) => {
   // Function to render rating icons with counts
   const renderRatings = () => {
@@ -46,7 +48,10 @@ const ProductTile: React.FC<ProductTileProps> = ({
 
   return (
     <div className="rounded-lg border bg-card shadow-sm overflow-hidden flex flex-col h-full">
-      <div className="relative">
+      <div 
+        className="relative cursor-pointer" 
+        onClick={() => onViewDetails(product)}
+      >
         <img 
           src={product.image} 
           alt={product.name} 
@@ -60,7 +65,12 @@ const ProductTile: React.FC<ProductTileProps> = ({
       </div>
       
       <div className="p-3 flex-1 flex flex-col">
-        <h3 className="font-semibold text-base line-clamp-1">{product.name}</h3>
+        <h3 
+          className="font-semibold text-base line-clamp-1 cursor-pointer" 
+          onClick={() => onViewDetails(product)}
+        >
+          {product.name}
+        </h3>
         <p className="text-muted-foreground text-xs line-clamp-2 mt-1 mb-2">
           {product.description}
         </p>
@@ -95,7 +105,10 @@ const ProductTile: React.FC<ProductTileProps> = ({
               variant="outline" 
               size="sm" 
               className="flex-1 text-xs"
-              onClick={() => onAddToCart(product)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(product);
+              }}
               disabled={stockLevel === 0}
             >
               Add to cart
@@ -104,7 +117,10 @@ const ProductTile: React.FC<ProductTileProps> = ({
               variant="default" 
               size="sm" 
               className="flex-1 text-xs bg-sizzle-600 hover:bg-sizzle-700"
-              onClick={() => onBuyNow(product)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onBuyNow(product);
+              }}
               disabled={stockLevel === 0}
             >
               Buy now
