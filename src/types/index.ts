@@ -11,6 +11,7 @@ export type User = {
   email: string;
   primaryLocationId: string;
   createdAt: string;
+  isAdmin?: boolean;
 };
 
 export type Category = {
@@ -35,6 +36,7 @@ export type Product = {
   bestBeforeDate: string;
   ratings: Record<ProductRating, number>;
   locationInventory: Record<string, number>;
+  active?: boolean;
 };
 
 export type CartItem = {
@@ -59,4 +61,34 @@ export type LoginCredentials = {
 
 export type RegisterCredentials = LoginCredentials & {
   primaryLocationId: string;
+};
+
+export type DiscountRule = {
+  id: string;
+  name: string;
+  description: string;
+  type: "percentage" | "fixed";
+  value: number;
+  conditions: {
+    daysBeforeExpiry?: number;
+    categoryIds?: string[];
+    locationIds?: string[];
+  };
+  active: boolean;
+  createdAt: string;
+};
+
+export type SalesReportFilter = {
+  startDate: Date;
+  endDate: Date;
+  locationId?: string;
+  categoryId?: string;
+};
+
+export type SalesReportItem = {
+  date: string;
+  totalSales: number;
+  totalItems: number;
+  locationId?: string;
+  categoryId?: string;
 };
