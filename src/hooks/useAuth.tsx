@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useContext,
@@ -9,12 +10,14 @@ import {
   User,
   LoginCredentials,
   RegisterCredentials,
+  Location
 } from "@/types";
-import { fakeLogin, fakeRegister } from "@/lib/auth";
+import { fakeLogin, fakeRegister, mockLocations } from "@/lib/auth";
 
 type AuthContextType = {
   user: User | null;
   loading: boolean;
+  locations: Location[];
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
@@ -29,6 +32,7 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const locations = mockLocations;
 
   useEffect(() => {
     // Check for user in local storage on initial load
@@ -75,6 +79,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value: AuthContextType = {
     user,
     loading,
+    locations,
     login,
     register,
     logout,
