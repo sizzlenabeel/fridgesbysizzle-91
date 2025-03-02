@@ -21,6 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   Plus, 
   Search, 
@@ -29,17 +36,23 @@ import {
   ToggleLeft, 
   ToggleRight, 
   Check,
-  X
+  X,
+  Building2
 } from "lucide-react";
 import { mockProducts, mockCategories } from "@/lib/mockData";
-import { Product, Category } from "@/types";
+import { Product, Category, Location } from "@/types";
+import { mockLocations } from "@/lib/auth";
 
 const ProductManagement = () => {
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isInventoryDialogOpen, setIsInventoryDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [inventoryProduct, setInventoryProduct] = useState<Product | null>(null);
+  const [locationInventory, setLocationInventory] = useState<Record<string, number>>({});
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -47,15 +60,34 @@ const ProductManagement = () => {
     image: "",
     isVegan: false,
     ingredients: "",
-    allergens: ""
+    bestBeforeDate: ""
   });
 
-  // Filter products based on search term
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Mock allergens data (this would come from the backend)
+  const mockAllergens = [
+    { id: "allergen1", name: "Gluten" },
+    { id: "allergen2", name: "Dairy" },
+    { id: "allergen3", name: "Nuts" },
+    { id: "allergen4", name: "Eggs" },
+    { id: "allergen5", name: "Soy" },
+    { id: "allergen6", name: "Fish" },
+    { id: "allergen7", name: "Shellfish" },
+    { id: "allergen8", name: "Wheat" }
+  ];
+
+  // Filter products based on search term and sort by active status
+  const filteredProducts = products
+    .filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      // Sort active products first
+      if (a.active === false && b.active !== false) return 1;
+      if (a.active !== false && b.active === false) return -1;
+      return 0;
+    });
 
   // Handle form input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -88,6 +120,15 @@ const ProductManagement = () => {
     }
   };
 
+  // Handle allergen selection
+  const toggleAllergen = (allergenId: string) => {
+    if (selectedAllergens.includes(allergenId)) {
+      setSelectedAllergens(selectedAllergens.filter(id => id !== allergenId));
+    } else {
+      setSelectedAllergens([...selectedAllergens, allergenId]);
+    }
+  };
+
   // Reset form
   const resetForm = () => {
     setForm({
@@ -97,9 +138,10 @@ const ProductManagement = () => {
       image: "",
       isVegan: false,
       ingredients: "",
-      allergens: ""
+      bestBeforeDate: ""
     });
     setSelectedCategories([]);
+    setSelectedAllergens([]);
     setEditingProduct(null);
   };
 
@@ -113,10 +155,42 @@ const ProductManagement = () => {
       image: product.image,
       isVegan: product.isVegan,
       ingredients: product.ingredients.join(", "),
-      allergens: product.allergens.join(", ")
+      bestBeforeDate: new Date(product.bestBeforeDate).toISOString().split('T')[0]
     });
     setSelectedCategories(product.categories.map(cat => cat.id));
+    setSelectedAllergens(product.allergens);
     setIsAddDialogOpen(true);
+  };
+
+  // Open inventory dialog
+  const openInventoryDialog = (product: Product) => {
+    setInventoryProduct(product);
+    setLocationInventory(product.locationInventory || {});
+    setIsInventoryDialogOpen(true);
+  };
+
+  // Handle inventory change
+  const handleInventoryChange = (locationId: string, value: string) => {
+    setLocationInventory({
+      ...locationInventory,
+      [locationId]: parseInt(value) || 0
+    });
+  };
+
+  // Save inventory changes
+  const saveInventory = () => {
+    if (!inventoryProduct) return;
+    
+    setProducts(
+      products.map((product) =>
+        product.id === inventoryProduct.id
+          ? { ...product, locationInventory }
+          : product
+      )
+    );
+    
+    setIsInventoryDialogOpen(false);
+    setInventoryProduct(null);
   };
 
   // Handle form submission
@@ -139,7 +213,8 @@ const ProductManagement = () => {
                 image: form.image,
                 isVegan: form.isVegan,
                 ingredients: form.ingredients.split(",").map(i => i.trim()),
-                allergens: form.allergens.split(",").map(a => a.trim()),
+                allergens: selectedAllergens,
+                bestBeforeDate: form.bestBeforeDate || new Date().toISOString(),
                 categories: mockCategories.filter(cat => selectedCategories.includes(cat.id))
               }
             : product
@@ -155,19 +230,31 @@ const ProductManagement = () => {
         image: form.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&h=500",
         isVegan: form.isVegan,
         ingredients: form.ingredients.split(",").map(i => i.trim()),
-        allergens: form.allergens.split(",").map(a => a.trim()),
+        allergens: selectedAllergens,
         categories: mockCategories.filter(cat => selectedCategories.includes(cat.id)),
-        bestBeforeDate: new Date(Date.now() + 86400000 * 7).toISOString(), // 7 days from now
+        bestBeforeDate: form.bestBeforeDate || new Date(Date.now() + 86400000 * 7).toISOString(), // Default to 7 days from now
         ratings: { heart: 0, thumbsUp: 0, alright: 0, thumbsDown: 0 },
-        locationInventory: { location1: 10, location2: 10, location3: 10 },
+        locationInventory: { }, // Empty initially
         active: true
       };
       
-      setProducts([...products, newProduct]);
+      const newProducts = [...products, newProduct];
+      setProducts(newProducts);
+      
+      // Automatically open inventory dialog for the new product
+      setInventoryProduct(newProduct);
+      setLocationInventory({});
+      setIsAddDialogOpen(false);
+      setIsInventoryDialogOpen(true);
     }
     
-    resetForm();
-    setIsAddDialogOpen(false);
+    if (!editingProduct) {
+      resetForm();
+      setIsAddDialogOpen(false);
+    } else {
+      resetForm();
+      setIsAddDialogOpen(false);
+    }
   };
 
   return (
@@ -254,6 +341,18 @@ const ProductManagement = () => {
                 </div>
                 
                 <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="bestBeforeDate">Best Before Date</Label>
+                  <Input
+                    id="bestBeforeDate"
+                    name="bestBeforeDate"
+                    type="date"
+                    value={form.bestBeforeDate}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="ingredients">Ingredients (comma separated)</Label>
                   <Input
                     id="ingredients"
@@ -265,14 +364,20 @@ const ProductManagement = () => {
                 </div>
                 
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="allergens">Allergens (comma separated)</Label>
-                  <Input
-                    id="allergens"
-                    name="allergens"
-                    value={form.allergens}
-                    onChange={handleInputChange}
-                    placeholder="Allergen 1, Allergen 2"
-                  />
+                  <Label>Allergens</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {mockAllergens.map((allergen) => (
+                      <Button
+                        key={allergen.id}
+                        type="button"
+                        variant={selectedAllergens.includes(allergen.id) ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => toggleAllergen(allergen.id)}
+                      >
+                        {allergen.name}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
                 
                 <div className="space-y-2 pt-2">
@@ -322,6 +427,50 @@ const ProductManagement = () => {
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* Inventory Dialog */}
+        <Dialog open={isInventoryDialogOpen} onOpenChange={setIsInventoryDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                Manage Inventory for {inventoryProduct?.name}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <div className="space-y-4">
+                {mockLocations.map((location) => (
+                  <div key={location.id} className="flex items-center space-x-4">
+                    <Building2 className="h-4 w-4 text-gray-500" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{location.name}</p>
+                      <p className="text-xs text-gray-500">{location.address}</p>
+                    </div>
+                    <Input
+                      type="number"
+                      min="0"
+                      className="w-20"
+                      value={locationInventory[location.id] || ""}
+                      onChange={(e) => handleInventoryChange(location.id, e.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsInventoryDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={saveInventory}>
+                Save Inventory
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
       
       {/* Products Table */}
@@ -346,7 +495,7 @@ const ProductManagement = () => {
               </TableRow>
             ) : (
               filteredProducts.map((product) => (
-                <TableRow key={product.id}>
+                <TableRow key={product.id} className={product.active === false ? "bg-gray-50" : ""}>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
                     {product.discountedPrice ? (
@@ -390,6 +539,14 @@ const ProductManagement = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openInventoryDialog(product)}
+                        title="Manage Inventory"
+                      >
+                        <Building2 className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
