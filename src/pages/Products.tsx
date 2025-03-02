@@ -1,26 +1,23 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate, Link } from "react-router-dom";
-import { Logo } from "@/components/Logo";
+import { useNavigate } from "react-router-dom";
 import { mockProducts, mockCategories } from "@/lib/mockData";
 import { Product } from "@/types";
-import ProductTile from "@/components/ProductTile";
-import ProductDetailOverlay from "@/components/ProductDetailOverlay";
+import ProductDetailOverlay from "@/components/product/ProductDetailOverlay";
 import CategoryFilter from "@/components/CategoryFilter";
-import { ShoppingCart, User, LogOut, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import SearchBar from "@/components/product/SearchBar";
+import ProductGrid from "@/components/product/ProductGrid";
+import Header from "@/components/layout/Header";
+import { Logo } from "@/components/Logo";
 import { useToast } from "@/components/ui/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const ProductsPage = () => {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
   
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [products] = useState<Product[]>(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -117,57 +114,18 @@ const ProductsPage = () => {
     <div className="min-h-screen bg-background">
       {/* Fixed header with navigation */}
       <header className="fixed top-0 left-0 right-0 bg-white z-10 border-b">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Logo size="md" />
-          <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              aria-label="Cart"
-              asChild
-              className="relative"
-              onClick={() => navigate("/cart")}
-            >
-              <div>
-                <ShoppingCart className="h-5 w-5" />
-                {cartItems.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-sizzle-600 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-                    {cartItems.length}
-                  </span>
-                )}
-              </div>
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              aria-label="Profile"
-              onClick={() => navigate("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              aria-label="Logout"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
+        <Header 
+          cartItemsCount={cartItems.length}
+          onLogout={handleLogout}
+        />
         
         {/* Search bar */}
         <div className="container mx-auto px-4 py-2 border-t">
-          <div className="relative mb-2">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              className="pl-10 h-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <SearchBar 
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search products..."
+          />
         </div>
         
         {/* Category filter */}
@@ -182,25 +140,12 @@ const ProductsPage = () => {
       
       {/* Content with top padding for the fixed header */}
       <main className="container mx-auto px-4 pt-40 pb-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredProducts.map(product => (
-            <ProductTile 
-              key={product.id}
-              product={product}
-              onAddToCart={handleAddToCart}
-              onBuyNow={handleBuyNow}
-              onViewDetails={handleViewProductDetails}
-            />
-          ))}
-        </div>
-        
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground">
-              No products found. Try a different search or category.
-            </p>
-          </div>
-        )}
+        <ProductGrid
+          products={filteredProducts}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+          onViewDetails={handleViewProductDetails}
+        />
       </main>
       
       {/* Product Detail Overlay */}

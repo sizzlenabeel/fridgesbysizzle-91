@@ -1,47 +1,21 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Eye, 
-  ToggleLeft, 
-  ToggleRight, 
-  Check,
-  X,
-  Building2
-} from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { mockProducts, mockCategories } from "@/lib/mockData";
-import { Product, Category, Location } from "@/types";
+import { Product } from "@/types";
 import { mockLocations } from "@/lib/auth";
+import ProductForm, { ProductFormData } from "./product/ProductForm";
+import InventoryForm from "./product/InventoryForm";
+import ProductTable from "./product/ProductTable";
 
 const ProductManagement = () => {
   const [products, setProducts] = useState<Product[]>(mockProducts);
@@ -49,19 +23,8 @@ const ProductManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isInventoryDialogOpen, setIsInventoryDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [inventoryProduct, setInventoryProduct] = useState<Product | null>(null);
   const [locationInventory, setLocationInventory] = useState<Record<string, number>>({});
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    image: "",
-    isVegan: false,
-    ingredients: "",
-    bestBeforeDate: ""
-  });
 
   // Mock allergens data (this would come from the backend)
   const mockAllergens = [
@@ -75,30 +38,27 @@ const ProductManagement = () => {
     { id: "allergen8", name: "Wheat" }
   ];
 
-  // Filter products based on search term and sort by active status
-  const filteredProducts = products
-    .filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
+  // Sort products by active status
+  useEffect(() => {
+    // Make a copy to avoid modifying the original reference
+    const sortedProducts = [...products].sort((a, b) => {
       // Sort active products first
       if (a.active === false && b.active !== false) return 1;
       if (a.active !== false && b.active === false) return -1;
       return 0;
     });
+    
+    if (JSON.stringify(sortedProducts) !== JSON.stringify(products)) {
+      setProducts(sortedProducts);
+    }
+  }, [products]);
 
-  // Handle form input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  // Handle form switch change
-  const handleSwitchChange = (checked: boolean) => {
-    setForm({ ...form, isVegan: checked });
-  };
+  // Filter products based on search term
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Toggle product active status
   const toggleProductActive = (productId: string) => {
@@ -111,54 +71,15 @@ const ProductManagement = () => {
     );
   };
 
-  // Handle category selection
-  const toggleCategory = (categoryId: string) => {
-    if (selectedCategories.includes(categoryId)) {
-      setSelectedCategories(selectedCategories.filter(id => id !== categoryId));
-    } else {
-      setSelectedCategories([...selectedCategories, categoryId]);
-    }
-  };
-
-  // Handle allergen selection
-  const toggleAllergen = (allergenId: string) => {
-    if (selectedAllergens.includes(allergenId)) {
-      setSelectedAllergens(selectedAllergens.filter(id => id !== allergenId));
-    } else {
-      setSelectedAllergens([...selectedAllergens, allergenId]);
-    }
-  };
-
-  // Reset form
+  // Reset form and close dialog
   const resetForm = () => {
-    setForm({
-      name: "",
-      description: "",
-      price: "",
-      image: "",
-      isVegan: false,
-      ingredients: "",
-      bestBeforeDate: ""
-    });
-    setSelectedCategories([]);
-    setSelectedAllergens([]);
     setEditingProduct(null);
+    setIsAddDialogOpen(false);
   };
 
   // Open edit dialog
   const openEditDialog = (product: Product) => {
     setEditingProduct(product);
-    setForm({
-      name: product.name,
-      description: product.description,
-      price: product.price.toString(),
-      image: product.image,
-      isVegan: product.isVegan,
-      ingredients: product.ingredients.join(", "),
-      bestBeforeDate: new Date(product.bestBeforeDate).toISOString().split('T')[0]
-    });
-    setSelectedCategories(product.categories.map(cat => cat.id));
-    setSelectedAllergens(product.allergens);
     setIsAddDialogOpen(true);
   };
 
@@ -194,9 +115,7 @@ const ProductManagement = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = (formData: ProductFormData) => {
     // In a real app, we'd make an API call here
     // For now, we'll just update the local state
     
@@ -207,33 +126,37 @@ const ProductManagement = () => {
           product.id === editingProduct.id
             ? {
                 ...product,
-                name: form.name,
-                description: form.description,
-                price: parseFloat(form.price),
-                image: form.image,
-                isVegan: form.isVegan,
-                ingredients: form.ingredients.split(",").map(i => i.trim()),
-                allergens: selectedAllergens,
-                bestBeforeDate: form.bestBeforeDate || new Date().toISOString(),
-                categories: mockCategories.filter(cat => selectedCategories.includes(cat.id))
+                name: formData.name,
+                description: formData.description,
+                price: parseFloat(formData.price),
+                image: formData.image,
+                isVegan: formData.isVegan,
+                ingredients: formData.ingredients.split(",").map(i => i.trim()),
+                allergens: formData.selectedAllergens,
+                bestBeforeDate: formData.bestBeforeDate || new Date().toISOString(),
+                dueDate: formData.dueDate || undefined,
+                categories: mockCategories.filter(cat => formData.selectedCategories.includes(cat.id))
               }
             : product
         )
       );
+      
+      resetForm();
     } else {
       // Add new product
       const newProduct: Product = {
         id: `prod${products.length + 1}`,
-        name: form.name,
-        description: form.description,
-        price: parseFloat(form.price),
-        image: form.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&h=500",
-        isVegan: form.isVegan,
-        ingredients: form.ingredients.split(",").map(i => i.trim()),
-        allergens: selectedAllergens,
-        categories: mockCategories.filter(cat => selectedCategories.includes(cat.id)),
-        bestBeforeDate: form.bestBeforeDate || new Date(Date.now() + 86400000 * 7).toISOString(), // Default to 7 days from now
-        ratings: { heart: 0, thumbsUp: 0, alright: 0, thumbsDown: 0 },
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        image: formData.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&h=500",
+        isVegan: formData.isVegan,
+        ingredients: formData.ingredients.split(",").map(i => i.trim()),
+        allergens: formData.selectedAllergens,
+        categories: mockCategories.filter(cat => formData.selectedCategories.includes(cat.id)),
+        bestBeforeDate: formData.bestBeforeDate || new Date(Date.now() + 86400000 * 7).toISOString(), // Default to 7 days from now
+        dueDate: formData.dueDate || undefined,
+        ratings: { heart: 0, thumbsUp: 0, thumbsDown: 0 },
         locationInventory: { }, // Empty initially
         active: true
       };
@@ -246,14 +169,6 @@ const ProductManagement = () => {
       setLocationInventory({});
       setIsAddDialogOpen(false);
       setIsInventoryDialogOpen(true);
-    }
-    
-    if (!editingProduct) {
-      resetForm();
-      setIsAddDialogOpen(false);
-    } else {
-      resetForm();
-      setIsAddDialogOpen(false);
     }
   };
 
@@ -291,140 +206,13 @@ const ProductManagement = () => {
               </DialogTitle>
             </DialogHeader>
             
-            <form onSubmit={handleSubmit} className="space-y-6 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Product Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={form.name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price (kr)</Label>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.price}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    name="description"
-                    value={form.description}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input
-                    id="image"
-                    name="image"
-                    value={form.image}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="bestBeforeDate">Best Before Date</Label>
-                  <Input
-                    id="bestBeforeDate"
-                    name="bestBeforeDate"
-                    type="date"
-                    value={form.bestBeforeDate}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="ingredients">Ingredients (comma separated)</Label>
-                  <Input
-                    id="ingredients"
-                    name="ingredients"
-                    value={form.ingredients}
-                    onChange={handleInputChange}
-                    placeholder="Ingredient 1, Ingredient 2, Ingredient 3"
-                  />
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Allergens</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {mockAllergens.map((allergen) => (
-                      <Button
-                        key={allergen.id}
-                        type="button"
-                        variant={selectedAllergens.includes(allergen.id) ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => toggleAllergen(allergen.id)}
-                      >
-                        {allergen.name}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="isVegan"
-                      checked={form.isVegan}
-                      onCheckedChange={handleSwitchChange}
-                    />
-                    <Label htmlFor="isVegan">Vegan Product</Label>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Categories</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {mockCategories.map((category) => (
-                    <Button
-                      key={category.id}
-                      type="button"
-                      variant={selectedCategories.includes(category.id) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => toggleCategory(category.id)}
-                    >
-                      {category.name}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => {
-                    resetForm();
-                    setIsAddDialogOpen(false);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingProduct ? "Update Product" : "Add Product"}
-                </Button>
-              </DialogFooter>
-            </form>
+            <ProductForm
+              product={editingProduct}
+              onSubmit={handleSubmit}
+              onCancel={resetForm}
+              categories={mockCategories}
+              allergens={mockAllergens}
+            />
           </DialogContent>
         </Dialog>
 
@@ -437,143 +225,25 @@ const ProductManagement = () => {
               </DialogTitle>
             </DialogHeader>
             
-            <div className="py-4">
-              <div className="space-y-4">
-                {mockLocations.map((location) => (
-                  <div key={location.id} className="flex items-center space-x-4">
-                    <Building2 className="h-4 w-4 text-gray-500" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{location.name}</p>
-                      <p className="text-xs text-gray-500">{location.address}</p>
-                    </div>
-                    <Input
-                      type="number"
-                      min="0"
-                      className="w-20"
-                      value={locationInventory[location.id] || ""}
-                      onChange={(e) => handleInventoryChange(location.id, e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsInventoryDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={saveInventory}>
-                Save Inventory
-              </Button>
-            </DialogFooter>
+            <InventoryForm
+              locations={mockLocations}
+              locationInventory={locationInventory}
+              onInventoryChange={handleInventoryChange}
+              onSave={saveInventory}
+              onCancel={() => setIsInventoryDialogOpen(false)}
+              productName={inventoryProduct?.name}
+            />
           </DialogContent>
         </Dialog>
       </div>
       
       {/* Products Table */}
-      <div className="rounded-md border overflow-hidden">
-        <Table>
-          <TableCaption>List of all products in the system</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead className="hidden md:table-cell">Categories</TableHead>
-              <TableHead className="hidden md:table-cell">Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProducts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
-                  No products found
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredProducts.map((product) => (
-                <TableRow key={product.id} className={product.active === false ? "bg-gray-50" : ""}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>
-                    {product.discountedPrice ? (
-                      <div>
-                        <span className="line-through text-gray-400">{product.price} kr</span>
-                        <span className="ml-2 font-medium text-sizzle-600">
-                          {product.discountedPrice} kr
-                        </span>
-                      </div>
-                    ) : (
-                      <span>{product.price} kr</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="flex flex-wrap gap-1">
-                      {product.categories.slice(0, 2).map((category) => (
-                        <span
-                          key={category.id}
-                          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                        >
-                          {category.name}
-                        </span>
-                      ))}
-                      {product.categories.length > 2 && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          +{product.categories.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        product.active === false
-                          ? "bg-red-100 text-red-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {product.active === false ? "Inactive" : "Active"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openInventoryDialog(product)}
-                        title="Manage Inventory"
-                      >
-                        <Building2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => toggleProductActive(product.id)}
-                        title={product.active === false ? "Activate" : "Deactivate"}
-                      >
-                        {product.active === false ? (
-                          <ToggleLeft className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <ToggleRight className="h-5 w-5 text-green-500" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(product)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <ProductTable
+        products={filteredProducts}
+        onEditProduct={openEditDialog}
+        onToggleActive={toggleProductActive}
+        onManageInventory={openInventoryDialog}
+      />
     </div>
   );
 };
