@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { mockProducts, mockCategories } from "@/lib/mockData";
 import { Product } from "@/types";
@@ -11,16 +11,19 @@ import CategoryFilter from "@/components/CategoryFilter";
 import { ShoppingCart, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ProductsPage = () => {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [cartItems, setCartItems] = useState<Product[]>([]);
   
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -43,19 +46,28 @@ const ProductsPage = () => {
   }, [selectedCategory, products]);
   
   const handleAddToCart = (product: Product) => {
+    // Add to cart functionality
+    setCartItems(prev => [...prev, product]);
+    
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
+      duration: 3000,
     });
-    // This would be connected to cart functionality in the future
   };
   
   const handleBuyNow = (product: Product) => {
+    // Add to cart first
+    setCartItems(prev => [...prev, product]);
+    
     toast({
       title: "Quick buy",
       description: `Proceeding to checkout with ${product.name}.`,
+      duration: 3000,
     });
-    // This would redirect to checkout in the future
+    
+    // Navigate to cart (simulating immediate checkout)
+    navigate("/cart");
   };
   
   const handleSelectCategory = (categoryId: string | null) => {
@@ -97,11 +109,31 @@ const ProductsPage = () => {
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <Logo size="md" />
           <div className="flex gap-2">
-            <Button variant="ghost" size="icon" aria-label="Cart">
-              <ShoppingCart className="h-5 w-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              aria-label="Cart"
+              asChild
+              className="relative"
+            >
+              <Link to="/cart">
+                <ShoppingCart className="h-5 w-5" />
+                {cartItems.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-sizzle-600 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                    {cartItems.length}
+                  </span>
+                )}
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Profile">
-              <User className="h-5 w-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              aria-label="Profile"
+              asChild
+            >
+              <Link to="/profile">
+                <User className="h-5 w-5" />
+              </Link>
             </Button>
             <Button 
               variant="ghost" 

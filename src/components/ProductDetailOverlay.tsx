@@ -1,7 +1,6 @@
-
 import React, { useRef, useEffect } from "react";
 import { Product } from "@/types";
-import { X, Heart, ThumbsUp, Check, ThumbsDown } from "lucide-react";
+import { X, Heart, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -63,7 +62,7 @@ const ProductDetailOverlay: React.FC<ProductDetailOverlayProps> = ({
     };
   }, [onClose]);
 
-  // Function to render rating icons with counts
+  // Function to render rating icons with counts (updated to 3 ratings)
   const renderRatings = () => {
     return (
       <div className="flex items-center gap-3 flex-wrap mt-1">
@@ -74,10 +73,6 @@ const ProductDetailOverlay: React.FC<ProductDetailOverlayProps> = ({
         <div className="flex items-center gap-1">
           <ThumbsUp className="h-4 w-4 text-blue-500" />
           <span>{product.ratings.thumbsUp}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Check className="h-4 w-4 text-green-500" />
-          <span>{product.ratings.alright}</span>
         </div>
         <div className="flex items-center gap-1">
           <ThumbsDown className="h-4 w-4 text-gray-500" />

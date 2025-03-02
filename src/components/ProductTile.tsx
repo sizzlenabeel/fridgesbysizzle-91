@@ -3,7 +3,7 @@ import React from "react";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Heart, ThumbsUp, Check, ThumbsDown } from "lucide-react";
+import { Heart, ThumbsUp, ThumbsDown } from "lucide-react";
 
 interface ProductTileProps {
   product: Product;
@@ -18,7 +18,7 @@ const ProductTile: React.FC<ProductTileProps> = ({
   onBuyNow,
   onViewDetails
 }) => {
-  // Function to render rating icons with counts
+  // Function to render rating icons with counts (updated to 3 ratings)
   const renderRatings = () => {
     return (
       <div className="flex items-center gap-2 text-xs flex-wrap mt-1">
@@ -29,10 +29,6 @@ const ProductTile: React.FC<ProductTileProps> = ({
         <div className="flex items-center gap-1">
           <ThumbsUp className="h-3.5 w-3.5 text-blue-500" />
           <span>{product.ratings.thumbsUp}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Check className="h-3.5 w-3.5 text-green-500" />
-          <span>{product.ratings.alright}</span>
         </div>
         <div className="flex items-center gap-1">
           <ThumbsDown className="h-3.5 w-3.5 text-gray-500" />
@@ -111,7 +107,7 @@ const ProductTile: React.FC<ProductTileProps> = ({
               }}
               disabled={stockLevel === 0}
             >
-              Add to cart
+              Add
             </Button>
             <Button 
               variant="default" 
@@ -123,7 +119,7 @@ const ProductTile: React.FC<ProductTileProps> = ({
               }}
               disabled={stockLevel === 0}
             >
-              Buy now
+              Buy
             </Button>
           </div>
         </div>
