@@ -1,7 +1,7 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -27,16 +27,40 @@ import LocationManagement from "@/components/admin/LocationManagement";
 import UserManagement from "@/components/admin/UserManagement";
 import DiscountRules from "@/components/admin/DiscountRules";
 import SalesReports from "@/components/admin/SalesReports";
+import { useToast } from "@/components/ui/use-toast";
 
 type AdminTab = "products" | "locations" | "users" | "discounts" | "reports";
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<AdminTab>("products");
 
-  // Check if user is admin, redirect if not
+  // Check if user is logged in and is an admin
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        navigate("/");
+      } else if (!user.isAdmin) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access the admin area.",
+          variant: "destructive"
+        });
+        navigate("/products");
+      }
+    }
+  }, [user, loading, navigate, toast]);
+
+  // Show loading state
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  // If user is not an admin, redirect (this is a fallback)
   if (!user?.isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/products" replace />;
   }
 
   // Define sidebar items

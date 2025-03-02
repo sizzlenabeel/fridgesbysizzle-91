@@ -13,9 +13,8 @@ export const fakeLogin = async (credentials: LoginCredentials): Promise<User> =>
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 800));
 
-  // For demo purpose, we'll accept any email/password and return a mock user
-  // In a real app, you would validate credentials against a backend
-  if (credentials.email.includes("admin")) {
+  // Check for admin email - making this more explicit
+  if (credentials.email.toLowerCase().includes("admin")) {
     return {
       id: "admin1",
       email: credentials.email,
@@ -38,9 +37,8 @@ export const fakeRegister = async (credentials: RegisterCredentials): Promise<Us
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 800));
 
-  // For demo purpose, we'll accept any registration and return a mock user
-  // In a real app, you would send this to your backend
-  if (credentials.email.includes("admin")) {
+  // Check for admin email - making this more explicit
+  if (credentials.email.toLowerCase().includes("admin")) {
     return {
       id: "admin_" + Math.random().toString(36).substring(7),
       email: credentials.email,

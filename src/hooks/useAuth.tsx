@@ -6,6 +6,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   LoginCredentials,
@@ -32,6 +33,7 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const locations = mockLocations;
 
   useEffect(() => {
@@ -49,6 +51,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const user = await fakeLogin(credentials);
       setUser(user);
       localStorage.setItem("user", JSON.stringify(user));
+      
+      // After successful login, redirect to products page or admin page
+      if (user.isAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/products");
+      }
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -63,6 +72,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const user = await fakeRegister(credentials);
       setUser(user);
       localStorage.setItem("user", JSON.stringify(user));
+      
+      // After successful registration, redirect to products page
+      navigate("/products");
     } catch (error) {
       console.error("Registration failed:", error);
       throw error;
@@ -74,6 +86,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async () => {
     setUser(null);
     localStorage.removeItem("user");
+    navigate("/");
   };
 
   const value: AuthContextType = {
