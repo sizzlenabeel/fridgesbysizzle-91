@@ -8,8 +8,9 @@ import { Product } from "@/types";
 import ProductTile from "@/components/ProductTile";
 import ProductDetailOverlay from "@/components/ProductDetailOverlay";
 import CategoryFilter from "@/components/CategoryFilter";
-import { ShoppingCart, User, LogOut } from "lucide-react";
+import { ShoppingCart, User, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -24,6 +25,7 @@ const ProductsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -32,18 +34,28 @@ const ProductsPage = () => {
     }
   }, [user, loading, navigate]);
   
-  // Filter products when category changes
+  // Filter products when category or search changes
   useEffect(() => {
-    if (selectedCategory === null) {
-      setFilteredProducts(products);
-    } else {
-      setFilteredProducts(
-        products.filter(product => 
-          product.categories.some(category => category.id === selectedCategory)
-        )
+    let results = products;
+    
+    // Apply category filter if selected
+    if (selectedCategory !== null) {
+      results = results.filter(product => 
+        product.categories.some(category => category.id === selectedCategory)
       );
     }
-  }, [selectedCategory, products]);
+    
+    // Apply search filter if query exists
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      results = results.filter(product => 
+        product.name.toLowerCase().includes(query) || 
+        product.description.toLowerCase().includes(query)
+      );
+    }
+    
+    setFilteredProducts(results);
+  }, [selectedCategory, searchQuery, products]);
   
   const handleAddToCart = (product: Product) => {
     // Add to cart functionality
@@ -52,7 +64,6 @@ const ProductsPage = () => {
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
-      duration: 3000,
     });
   };
   
@@ -115,25 +126,24 @@ const ProductsPage = () => {
               aria-label="Cart"
               asChild
               className="relative"
+              onClick={() => navigate("/cart")}
             >
-              <Link to="/cart">
+              <div>
                 <ShoppingCart className="h-5 w-5" />
                 {cartItems.length > 0 && (
                   <span className="absolute -top-1 -right-1 bg-sizzle-600 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
                     {cartItems.length}
                   </span>
                 )}
-              </Link>
+              </div>
             </Button>
             <Button 
               variant="ghost" 
               size="icon" 
               aria-label="Profile"
-              asChild
+              onClick={() => navigate("/profile")}
             >
-              <Link to="/profile">
-                <User className="h-5 w-5" />
-              </Link>
+              <User className="h-5 w-5" />
             </Button>
             <Button 
               variant="ghost" 
@@ -146,7 +156,21 @@ const ProductsPage = () => {
           </div>
         </div>
         
-        {/* Category filter that sticks to the top */}
+        {/* Search bar */}
+        <div className="container mx-auto px-4 py-2 border-t">
+          <div className="relative mb-2">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search products..."
+              className="pl-10 h-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+        
+        {/* Category filter */}
         <div className="container mx-auto px-4 py-2 border-t">
           <CategoryFilter 
             categories={mockCategories}
@@ -157,7 +181,7 @@ const ProductsPage = () => {
       </header>
       
       {/* Content with top padding for the fixed header */}
-      <main className="container mx-auto px-4 pt-32 pb-6">
+      <main className="container mx-auto px-4 pt-40 pb-6">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredProducts.map(product => (
             <ProductTile 
@@ -173,7 +197,7 @@ const ProductsPage = () => {
         {filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <p className="text-lg text-muted-foreground">
-              No products found in this category.
+              No products found. Try a different search or category.
             </p>
           </div>
         )}
