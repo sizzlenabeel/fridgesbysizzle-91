@@ -134,13 +134,10 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) =>
     </Button>
   );
 
-  const cartContent = (
-    <div className={`${isFullPage ? "" : "h-full"} flex flex-col`}>
-      <SheetHeader className="border-b pb-4 mb-4">
-        <SheetTitle>Your Cart ({cartItems.length})</SheetTitle>
-      </SheetHeader>
-
-      {cartItems.length === 0 ? (
+  // Common cart content for both full page and overlay modes
+  const renderCartContent = () => {
+    if (cartItems.length === 0) {
+      return (
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <ShoppingCart className="h-16 w-16 text-gray-300 mb-4" />
           <h1 className="text-2xl font-bold mb-2">Your cart is empty</h1>
@@ -149,152 +146,159 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) =>
             <Link to="/products">Browse products</Link>
           </Button>
         </div>
-      ) : (
-        <>
-          <div className="flex-1 overflow-y-auto">
-            <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div key={item.product.id} className="border-b pb-4">
-                  <div className="flex gap-3">
-                    <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0">
-                      <img 
-                        src={item.product.image} 
-                        alt={item.product.name} 
-                        className="w-full h-full object-cover"
-                      />
+      );
+    }
+
+    return (
+      <>
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-4">
+            {cartItems.map((item) => (
+              <div key={item.product.id} className="border-b pb-4">
+                <div className="flex gap-3">
+                  <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0">
+                    <img 
+                      src={item.product.image} 
+                      alt={item.product.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-medium">{item.product.name}</h3>
+                      <button 
+                        onClick={() => removeItem(item.product.id)}
+                        className="text-gray-400 hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                     
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-medium">{item.product.name}</h3>
+                    <div className="flex items-end justify-between mt-2">
+                      <div className="flex items-center border rounded-md">
                         <button 
-                          onClick={() => removeItem(item.product.id)}
-                          className="text-gray-400 hover:text-red-500"
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          className="px-2 py-0.5 text-gray-600 hover:bg-gray-100"
+                          disabled={item.quantity <= 1}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="px-2 py-0.5 text-center w-8 text-sm">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          className="px-2 py-0.5 text-gray-600 hover:bg-gray-100"
+                        >
+                          <Plus className="h-3 w-3" />
                         </button>
                       </div>
                       
-                      <div className="flex items-end justify-between mt-2">
-                        <div className="flex items-center border rounded-md">
-                          <button 
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                            className="px-2 py-0.5 text-gray-600 hover:bg-gray-100"
-                            disabled={item.quantity <= 1}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="px-2 py-0.5 text-center w-8 text-sm">{item.quantity}</span>
-                          <button 
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            className="px-2 py-0.5 text-gray-600 hover:bg-gray-100"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-                        
-                        <ProductPrice 
-                          price={item.product.price * item.quantity} 
-                          discountedPrice={item.product.discountedPrice ? item.product.discountedPrice * item.quantity : undefined}
-                          size="sm"
-                        />
-                      </div>
+                      <ProductPrice 
+                        price={item.product.price * item.quantity} 
+                        discountedPrice={item.product.discountedPrice ? item.product.discountedPrice * item.quantity : undefined}
+                        size="sm"
+                      />
                     </div>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-auto pt-4 border-t">
+          {/* Promo Code Section */}
+          <div className="mb-4">
+            <div className="flex gap-2 items-center mb-1">
+              <Tag className="h-4 w-4 text-sizzle-600" />
+              <span className="text-sm font-medium">Promo Code</span>
             </div>
+            <div className="flex gap-2">
+              <Input 
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                placeholder="Enter code"
+                className="h-9 text-sm"
+              />
+              <Button 
+                onClick={handleApplyPromo}
+                variant="outline"
+                className="h-9 text-sm whitespace-nowrap"
+              >
+                Apply
+              </Button>
+            </div>
+            {appliedPromo && (
+              <div className="text-xs text-green-600 mt-1">
+                Code "{appliedPromo.code}" applied: {appliedPromo.discount * 100}% off
+              </div>
+            )}
           </div>
 
-          <div className="mt-auto pt-4 border-t">
-            {/* Promo Code Section */}
-            <div className="mb-4">
-              <div className="flex gap-2 items-center mb-1">
-                <Tag className="h-4 w-4 text-sizzle-600" />
-                <span className="text-sm font-medium">Promo Code</span>
-              </div>
-              <div className="flex gap-2">
-                <Input 
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  placeholder="Enter code"
-                  className="h-9 text-sm"
-                />
-                <Button 
-                  onClick={handleApplyPromo}
-                  variant="outline"
-                  className="h-9 text-sm whitespace-nowrap"
-                >
-                  Apply
-                </Button>
-              </div>
-              {appliedPromo && (
-                <div className="text-xs text-green-600 mt-1">
-                  Code "{appliedPromo.code}" applied: {appliedPromo.discount * 100}% off
-                </div>
-              )}
+          {/* Order Summary */}
+          <div className="space-y-2 mb-4 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Subtotal</span>
+              <span className="font-medium">{calculateSubtotal()} kr</span>
             </div>
-
-            {/* Order Summary */}
-            <div className="space-y-2 mb-4 text-sm">
+            
+            {calculateTotalDiscount() > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">{calculateSubtotal()} kr</span>
+                <span className="text-gray-600">Product discounts</span>
+                <span className="font-medium text-green-600">-{calculateTotalDiscount()} kr</span>
               </div>
-              
-              {calculateTotalDiscount() > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Product discounts</span>
-                  <span className="font-medium text-green-600">-{calculateTotalDiscount()} kr</span>
-                </div>
-              )}
-              
-              {appliedPromo && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Promo discount ({appliedPromo.discount * 100}%)</span>
-                  <span className="font-medium text-green-600">-{calculatePromoDiscount().toFixed(0)} kr</span>
-                </div>
-              )}
-              
-              <div className="border-t pt-2 mt-2 flex justify-between">
-                <span className="font-semibold">Total</span>
-                <span className="font-bold">{calculateFinalTotal().toFixed(0)} kr</span>
+            )}
+            
+            {appliedPromo && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Promo discount ({appliedPromo.discount * 100}%)</span>
+                <span className="font-medium text-green-600">-{calculatePromoDiscount().toFixed(0)} kr</span>
               </div>
-            </div>
+            )}
             
-            <Button 
-              onClick={handleCheckout}
-              className="w-full bg-sizzle-600 hover:bg-sizzle-700 text-white"
-            >
-              Proceed to Checkout
-            </Button>
-            
-            <div className="mt-3 text-center text-xs text-gray-500">
-              {user ? (
-                <p>Ordering as {user.email}</p>
-              ) : (
-                <p>
-                  <Link to="/" className="text-sizzle-600 hover:underline">Login</Link> or 
-                  <Link to="/register" className="text-sizzle-600 hover:underline ml-1">Register</Link> to continue
-                </p>
-              )}
+            <div className="border-t pt-2 mt-2 flex justify-between">
+              <span className="font-semibold">Total</span>
+              <span className="font-bold">{calculateFinalTotal().toFixed(0)} kr</span>
             </div>
           </div>
-        </>
-      )}
-    </div>
-  );
+          
+          <Button 
+            onClick={handleCheckout}
+            className="w-full bg-sizzle-600 hover:bg-sizzle-700 text-white"
+          >
+            Proceed to Checkout
+          </Button>
+          
+          <div className="mt-3 text-center text-xs text-gray-500">
+            {user ? (
+              <p>Ordering as {user.email}</p>
+            ) : (
+              <p>
+                <Link to="/" className="text-sizzle-600 hover:underline">Login</Link> or 
+                <Link to="/register" className="text-sizzle-600 hover:underline ml-1">Register</Link> to continue
+              </p>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  };
 
-  // For full page view, render the cart content directly
+  // Full page version
   if (isFullPage) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
-        {cartContent}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Your Cart ({cartItems.length})</h1>
+        </div>
+        <div className="flex flex-col h-full">
+          {renderCartContent()}
+        </div>
       </div>
     );
   }
 
-  // For overlay view, render within the Sheet component
+  // Overlay version
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -302,7 +306,12 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) =>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md p-0 pr-1">
         <div className="p-6 h-full overflow-y-auto">
-          {cartContent}
+          <SheetHeader className="border-b pb-4 mb-4">
+            <SheetTitle>Your Cart ({cartItems.length})</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col h-full">
+            {renderCartContent()}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
