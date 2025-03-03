@@ -16,13 +16,7 @@ const Cart = () => {
         </Link>
       </div>
       
-      <CartSheet 
-        trigger={
-          <div className="hidden">
-            {/* This is just a placeholder, the CartSheet will render its content directly */}
-          </div>
-        } 
-      />
+      <CartSheet isFullPage={true} />
     </div>
   );
 };

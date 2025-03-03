@@ -4,76 +4,37 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { CartItem, Product } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Minus, Plus, ShoppingCart, Trash2, Tag } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import ProductPrice from "@/components/product/ProductPrice";
+import { CartItem } from "@/types";
+import { mockProducts } from "@/lib/mockData";
 
 // Mock cart data for frontend development
 const mockCartItems: CartItem[] = [
   {
-    product: {
-      id: "1",
-      name: "Chicken Salad",
-      description: "Fresh salad with grilled chicken",
-      price: 89,
-      discountedPrice: 79,
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
-      categories: [{ id: "1", name: "Meals" }],
-      isVegan: false,
-      ingredients: ["Chicken", "Lettuce", "Tomato", "Cucumber", "Olive oil"],
-      allergens: ["Nuts"],
-      bestBeforeDate: "2023-12-30",
-      ratings: {
-        heart: 25,
-        thumbsUp: 15,
-        alright: 5,
-        thumbsDown: 2
-      },
-      locationInventory: {
-        "1": 15
-      }
-    },
+    product: mockProducts[0], // Chicken Salad
     quantity: 2
   },
   {
-    product: {
-      id: "2",
-      name: "Vegan Wrap",
-      description: "Delicious vegan wrap with fresh vegetables",
-      price: 69,
-      image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
-      categories: [{ id: "2", name: "Snacks" }],
-      isVegan: true,
-      ingredients: ["Tortilla", "Hummus", "Lettuce", "Tomato", "Bell pepper"],
-      allergens: ["Gluten"],
-      bestBeforeDate: "2023-12-28",
-      ratings: {
-        heart: 18,
-        thumbsUp: 12,
-        alright: 8,
-        thumbsDown: 1
-      },
-      locationInventory: {
-        "1": 8
-      }
-    },
+    product: mockProducts[1], // Vegan Wrap
     quantity: 1
   }
 ];
 
 interface CartSheetProps {
   trigger?: React.ReactNode;
+  isFullPage?: boolean;
 }
 
-const CartSheet: React.FC<CartSheetProps> = ({ trigger }) => {
+const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(mockCartItems);
   const [promoCode, setPromoCode] = useState<string>("");
   const [appliedPromo, setAppliedPromo] = useState<{code: string, discount: number} | null>(null);
   const { user } = useAuth();
-  const { toast } = useToast();
   
+  // Cart content and functionality
   const updateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
     
@@ -174,7 +135,7 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger }) => {
   );
 
   const cartContent = (
-    <div className="h-full flex flex-col">
+    <div className={`${isFullPage ? "" : "h-full"} flex flex-col`}>
       <SheetHeader className="border-b pb-4 mb-4">
         <SheetTitle>Your Cart ({cartItems.length})</SheetTitle>
       </SheetHeader>
@@ -324,6 +285,16 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger }) => {
     </div>
   );
 
+  // For full page view, render the cart content directly
+  if (isFullPage) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        {cartContent}
+      </div>
+    );
+  }
+
+  // For overlay view, render within the Sheet component
   return (
     <Sheet>
       <SheetTrigger asChild>
