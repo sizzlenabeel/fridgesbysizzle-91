@@ -1,11 +1,12 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { DialogFooter } from "@/components/ui/dialog";
 import { Product, Category } from "@/types";
+import BasicInfoFields from "./form/BasicInfoFields";
+import DateFields from "./form/DateFields";
+import IngredientsField from "./form/IngredientsField";
+import AllergensSelector from "./form/AllergensSelector";
+import CategoriesSelector from "./form/CategoriesSelector";
+import FormActions from "./form/FormActions";
 
 interface ProductFormProps {
   product?: Product | null;
@@ -96,146 +97,43 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <form onSubmit={handleSubmitForm} className="space-y-6 py-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="name">Product Name</Label>
-          <Input
-            id="name"
-            name="name"
-            value={form.name}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="price">Price (kr)</Label>
-          <Input
-            id="price"
-            name="price"
-            type="number"
-            min="0"
-            step="0.01"
-            value={form.price}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="description">Description</Label>
-          <Input
-            id="description"
-            name="description"
-            value={form.description}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="image">Image URL</Label>
-          <Input
-            id="image"
-            name="image"
-            value={form.image}
-            onChange={handleInputChange}
-            placeholder="https://example.com/image.jpg"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="bestBeforeDate">Best Before Date</Label>
-          <Input
-            id="bestBeforeDate"
-            name="bestBeforeDate"
-            type="date"
-            value={form.bestBeforeDate}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="dueDate">Due Date</Label>
-          <Input
-            id="dueDate"
-            name="dueDate"
-            type="date"
-            value={form.dueDate}
-            onChange={handleInputChange}
-          />
-        </div>
-        
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="ingredients">Ingredients (comma separated)</Label>
-          <Input
-            id="ingredients"
-            name="ingredients"
-            value={form.ingredients}
-            onChange={handleInputChange}
-            placeholder="Ingredient 1, Ingredient 2, Ingredient 3"
-          />
-        </div>
-        
-        <div className="space-y-2 md:col-span-2">
-          <Label>Allergens</Label>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {allergens.map((allergen) => (
-              <Button
-                key={allergen.id}
-                type="button"
-                variant={form.selectedAllergens.includes(allergen.id) ? "default" : "outline"}
-                size="sm"
-                onClick={() => toggleAllergen(allergen.id)}
-              >
-                {allergen.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-        
-        <div className="space-y-2 pt-2">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="isVegan"
-              checked={form.isVegan}
-              onCheckedChange={handleSwitchChange}
-            />
-            <Label htmlFor="isVegan">Vegan Product</Label>
-          </div>
-        </div>
-      </div>
+      <BasicInfoFields
+        name={form.name}
+        description={form.description}
+        price={form.price}
+        image={form.image}
+        isVegan={form.isVegan}
+        onInputChange={handleInputChange}
+        onSwitchChange={handleSwitchChange}
+      />
       
-      <div className="space-y-2">
-        <Label>Categories</Label>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              type="button"
-              variant={form.selectedCategories.includes(category.id) ? "default" : "outline"}
-              size="sm"
-              onClick={() => toggleCategory(category.id)}
-            >
-              {category.name}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <DateFields
+        bestBeforeDate={form.bestBeforeDate}
+        dueDate={form.dueDate}
+        onInputChange={handleInputChange}
+      />
       
-      <DialogFooter>
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={onCancel}
-        >
-          Cancel
-        </Button>
-        <Button type="submit">
-          {product ? "Update Product" : "Add Product"}
-        </Button>
-      </DialogFooter>
+      <IngredientsField
+        ingredients={form.ingredients}
+        onInputChange={handleInputChange}
+      />
+      
+      <AllergensSelector
+        allergens={allergens}
+        selectedAllergens={form.selectedAllergens}
+        toggleAllergen={toggleAllergen}
+      />
+      
+      <CategoriesSelector
+        categories={categories}
+        selectedCategories={form.selectedCategories}
+        toggleCategory={toggleCategory}
+      />
+      
+      <FormActions
+        onCancel={onCancel}
+        isEditing={!!product}
+      />
     </form>
   );
 };
