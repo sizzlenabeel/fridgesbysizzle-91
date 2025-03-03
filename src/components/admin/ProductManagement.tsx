@@ -156,7 +156,7 @@ const ProductManagement = () => {
         categories: mockCategories.filter(cat => formData.selectedCategories.includes(cat.id)),
         bestBeforeDate: formData.bestBeforeDate || new Date(Date.now() + 86400000 * 7).toISOString(), // Default to 7 days from now
         dueDate: formData.dueDate || undefined,
-        ratings: { heart: 0, thumbsUp: 0, thumbsDown: 0 },
+        ratings: { heart: 0, thumbsUp: 0, alright: 0, thumbsDown: 0 },
         locationInventory: { }, // Empty initially
         active: true
       };

@@ -1,4 +1,3 @@
-
 export type Location = {
   id: string;
   name: string;
@@ -34,6 +33,7 @@ export type Product = {
   ingredients: string[];
   allergens: string[];
   bestBeforeDate: string;
+  dueDate?: string;
   ratings: Record<ProductRating, number>;
   locationInventory: Record<string, number>;
   active?: boolean;
