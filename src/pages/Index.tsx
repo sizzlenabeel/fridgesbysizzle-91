@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "@/components/Logo";
 import { AuthCard } from "@/components/AuthCard";
@@ -14,11 +14,24 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPWAPrompt, setShowPWAPrompt] = useState(false);
-  const { login, loading } = useAuth();
+  const { login, loading, user } = useAuth();
+  const navigate = useNavigate();
+  
+  // Check if user is already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/products");
+    }
+  }, [user, navigate]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ email, password });
+    try {
+      await login({ email, password });
+      navigate("/products");
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -131,7 +144,7 @@ const LoginPage = () => {
       
       {/* PWA Installation Prompt */}
       {showPWAPrompt && (
-        <div className="pwa-install-prompt animate-slide-up">
+        <div className="fixed bottom-4 left-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-700 animate-slide-up">
           <div className="flex justify-between items-center">
             <div className="font-medium">Install sizzle! app</div>
             <Button 
@@ -143,10 +156,10 @@ const LoginPage = () => {
               ✕
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground my-2">
             Install our app for a better experience and offline access
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-2">
             <Button 
               variant="outline" 
               className="flex-1"
