@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { mockProducts, mockCategories } from "@/lib/mockData";
@@ -12,17 +12,46 @@ import Header from "@/components/layout/Header";
 import { Logo } from "@/components/Logo";
 import { useToast } from "@/components/ui/use-toast";
 
+// This function simulates an API call to search for products
+// It will be replaced with a real API call in the future
+const searchProducts = (query: string, products: Product[]): Promise<Product[]> => {
+  return new Promise((resolve) => {
+    // Simulate API delay
+    setTimeout(() => {
+      if (!query.trim()) {
+        resolve([]);
+        return;
+      }
+      
+      const lowercaseQuery = query.toLowerCase();
+      const filtered = products.filter(
+        product => 
+          product.active !== false && (
+            product.name.toLowerCase().includes(lowercaseQuery) || 
+            product.description.toLowerCase().includes(lowercaseQuery) ||
+            product.categories.some(cat => cat.name.toLowerCase().includes(lowercaseQuery))
+          )
+      );
+      resolve(filtered);
+    }, 300); // Simulate network delay
+  });
+};
+
 const ProductsPage = () => {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const [products] = useState<Product[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(
+    mockProducts.filter(p => p.active !== false)
+  );
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cartItems, setCartItems] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -31,9 +60,27 @@ const ProductsPage = () => {
     }
   }, [user, loading, navigate]);
   
+  // Handle search suggestions
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchQuery.trim().length > 0) {
+        setIsSearching(true);
+        const suggestions = await searchProducts(searchQuery, products);
+        setSearchSuggestions(suggestions);
+        setIsSearching(false);
+      } else {
+        setSearchSuggestions([]);
+      }
+    };
+    
+    const debounceTimer = setTimeout(fetchSuggestions, 300);
+    
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, products]);
+  
   // Filter products when category or search changes
   useEffect(() => {
-    let results = products;
+    let results = products.filter(p => p.active !== false);
     
     // Apply category filter if selected
     if (selectedCategory !== null) {
@@ -98,6 +145,11 @@ const ProductsPage = () => {
     await logout();
     navigate("/");
   };
+
+  const handleSelectProductFromSearch = (product: Product) => {
+    setSearchQuery(product.name);
+    handleViewProductDetails(product);
+  };
   
   if (loading) {
     return (
@@ -125,6 +177,9 @@ const ProductsPage = () => {
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder="Search products..."
+            suggestions={searchSuggestions}
+            isLoading={isSearching}
+            onSelectProduct={handleSelectProductFromSearch}
           />
         </div>
         

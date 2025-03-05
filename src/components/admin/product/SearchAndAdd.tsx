@@ -1,30 +1,38 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { DialogTrigger } from "@/components/ui/dialog";
+import SearchBar from "@/components/product/SearchBar";
+import { Product } from "@/types";
 
 interface SearchAndAddProps {
   searchTerm: string;
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange: (value: string) => void;
   onAddClick: () => void;
+  searchSuggestions?: Product[];
+  isSearching?: boolean;
+  onSelectProduct?: (product: Product) => void;
 }
 
 const SearchAndAdd: React.FC<SearchAndAddProps> = ({
   searchTerm,
   onSearchChange,
-  onAddClick
+  onAddClick,
+  searchSuggestions,
+  isSearching,
+  onSelectProduct
 }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
       <div className="relative w-full sm:w-72">
-        <Search className="absolute left-3 top-3 text-gray-400 h-4 w-4" />
-        <Input
-          placeholder="Search products..."
-          className="pl-9"
+        <SearchBar
           value={searchTerm}
           onChange={onSearchChange}
+          placeholder="Search products..."
+          suggestions={searchSuggestions}
+          isLoading={isSearching}
+          onSelectProduct={onSelectProduct}
         />
       </div>
       

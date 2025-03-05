@@ -12,6 +12,7 @@ export const useProductManagement = (initialProducts: Product[]) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [inventoryProduct, setInventoryProduct] = useState<Product | null>(null);
   const [locationInventory, setLocationInventory] = useState<Record<string, number>>({});
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(initialProducts);
 
   // Sort products by active status
   useEffect(() => {
@@ -29,11 +30,14 @@ export const useProductManagement = (initialProducts: Product[]) => {
   }, [products]);
 
   // Filter products based on search term
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const filtered = products.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  }, [searchTerm, products]);
 
   // Toggle product active status
   const toggleProductActive = (productId: string) => {
