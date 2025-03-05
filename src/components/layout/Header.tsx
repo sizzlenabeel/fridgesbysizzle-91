@@ -1,17 +1,9 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, User, LogOut, Menu } from "lucide-react";
+import { ShoppingCart, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
   cartItemsCount: number;
@@ -43,31 +35,6 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount, onLogout }) => {
             )}
           </div>
         </Button>
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Menu">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Navigation</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/products")}>
-              Products
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/cart")}>
-              Cart
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/profile")}>
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onLogout}>
-              Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
         
         <Button 
           variant="ghost" 
