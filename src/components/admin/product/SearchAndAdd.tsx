@@ -25,7 +25,7 @@ const SearchAndAdd: React.FC<SearchAndAddProps> = ({
 }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
-      <div className="relative w-full sm:w-72">
+      <div className="relative w-full sm:w-96">
         <SearchBar
           value={searchTerm}
           onChange={onSearchChange}
@@ -33,6 +33,7 @@ const SearchAndAdd: React.FC<SearchAndAddProps> = ({
           suggestions={searchSuggestions}
           isLoading={isSearching}
           onSelectProduct={onSelectProduct}
+          className="w-full"
         />
       </div>
       

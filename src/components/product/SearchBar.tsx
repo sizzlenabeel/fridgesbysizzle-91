@@ -12,6 +12,7 @@ interface SearchBarProps {
   suggestions?: Product[];
   isLoading?: boolean;
   onSelectProduct?: (product: Product) => void;
+  className?: string;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -20,7 +21,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = "Search products...",
   suggestions = [],
   isLoading = false,
-  onSelectProduct
+  onSelectProduct,
+  className = ""
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [value]);
 
   return (
-    <div className="relative mb-2" ref={searchContainerRef}>
+    <div className={`relative mb-2 ${className}`} ref={searchContainerRef}>
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         type="search"

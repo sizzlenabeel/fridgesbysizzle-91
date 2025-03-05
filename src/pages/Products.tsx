@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -11,12 +10,11 @@ import ProductGrid from "@/components/product/ProductGrid";
 import Header from "@/components/layout/Header";
 import { Logo } from "@/components/Logo";
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Leaf } from "lucide-react";
 
-// This function simulates an API call to search for products
-// It will be replaced with a real API call in the future
 const searchProducts = (query: string, products: Product[]): Promise<Product[]> => {
   return new Promise((resolve) => {
-    // Simulate API delay
     setTimeout(() => {
       if (!query.trim()) {
         resolve([]);
@@ -33,7 +31,7 @@ const searchProducts = (query: string, products: Product[]): Promise<Product[]> 
           )
       );
       resolve(filtered);
-    }, 300); // Simulate network delay
+    }, 300);
   });
 };
 
@@ -52,15 +50,14 @@ const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [veganOnly, setVeganOnly] = useState<boolean>(false);
   
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !user) {
       navigate("/");
     }
   }, [user, loading, navigate]);
   
-  // Handle search suggestions
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.trim().length > 0) {
@@ -78,18 +75,19 @@ const ProductsPage = () => {
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, products]);
   
-  // Filter products when category or search changes
   useEffect(() => {
     let results = products.filter(p => p.active !== false);
     
-    // Apply category filter if selected
+    if (veganOnly) {
+      results = results.filter(product => product.isVegan === true);
+    }
+    
     if (selectedCategory !== null) {
       results = results.filter(product => 
         product.categories.some(category => category.id === selectedCategory)
       );
     }
     
-    // Apply search filter if query exists
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       results = results.filter(product => 
@@ -99,10 +97,9 @@ const ProductsPage = () => {
     }
     
     setFilteredProducts(results);
-  }, [selectedCategory, searchQuery, products]);
+  }, [selectedCategory, searchQuery, products, veganOnly]);
   
   const handleAddToCart = (product: Product) => {
-    // Add to cart functionality
     setCartItems(prev => [...prev, product]);
     
     toast({
@@ -112,7 +109,6 @@ const ProductsPage = () => {
   };
   
   const handleBuyNow = (product: Product) => {
-    // Add to cart first
     setCartItems(prev => [...prev, product]);
     
     toast({
@@ -121,7 +117,6 @@ const ProductsPage = () => {
       duration: 3000,
     });
     
-    // Navigate to cart (simulating immediate checkout)
     navigate("/cart");
   };
   
@@ -131,13 +126,11 @@ const ProductsPage = () => {
   
   const handleViewProductDetails = (product: Product) => {
     setSelectedProduct(product);
-    // Prevent body scrolling when overlay is open
     document.body.style.overflow = 'hidden';
   };
   
   const handleCloseProductDetails = () => {
     setSelectedProduct(null);
-    // Re-enable body scrolling when overlay is closed
     document.body.style.overflow = '';
   };
   
@@ -149,6 +142,10 @@ const ProductsPage = () => {
   const handleSelectProductFromSearch = (product: Product) => {
     setSearchQuery(product.name);
     handleViewProductDetails(product);
+  };
+  
+  const handleVeganToggle = (checked: boolean) => {
+    setVeganOnly(checked);
   };
   
   if (loading) {
@@ -164,26 +161,35 @@ const ProductsPage = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      {/* Fixed header with navigation */}
       <header className="fixed top-0 left-0 right-0 bg-white z-10 border-b">
         <Header 
           cartItemsCount={cartItems.length}
           onLogout={handleLogout}
         />
         
-        {/* Search bar */}
         <div className="container mx-auto px-4 py-2 border-t">
-          <SearchBar 
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search products..."
-            suggestions={searchSuggestions}
-            isLoading={isSearching}
-            onSelectProduct={handleSelectProductFromSearch}
-          />
+          <div className="flex items-center gap-4">
+            <SearchBar 
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search products..."
+              suggestions={searchSuggestions}
+              isLoading={isSearching}
+              onSelectProduct={handleSelectProductFromSearch}
+              className="flex-1"
+            />
+            <div className="flex items-center gap-2">
+              <Leaf className={`h-5 w-5 transition-colors ${veganOnly ? 'text-green-600' : 'text-gray-400'}`} />
+              <Switch 
+                checked={veganOnly} 
+                onCheckedChange={handleVeganToggle}
+                className={`${veganOnly ? 'bg-green-600' : ''} data-[state=checked]:bg-green-600`}
+              />
+              <span className="text-sm font-medium">Vegan</span>
+            </div>
+          </div>
         </div>
         
-        {/* Category filter */}
         <div className="container mx-auto px-4 py-2 border-t">
           <CategoryFilter 
             categories={mockCategories}
@@ -193,7 +199,6 @@ const ProductsPage = () => {
         </div>
       </header>
       
-      {/* Content with top padding for the fixed header */}
       <main className="container mx-auto px-4 pt-40 pb-6">
         <ProductGrid
           products={filteredProducts}
@@ -203,7 +208,6 @@ const ProductsPage = () => {
         />
       </main>
       
-      {/* Product Detail Overlay */}
       {selectedProduct && (
         <ProductDetailOverlay
           product={selectedProduct}
