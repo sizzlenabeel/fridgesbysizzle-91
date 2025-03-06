@@ -29,14 +29,16 @@ const ProductsContainer: React.FC<ProductsContainerProps> = ({
 
   return (
     <>
-      <main className="container mx-auto px-4 mt-40 pb-6">
-        <ProductGrid
-          products={products}
-          onAddToCart={onAddToCart}
-          onBuyNow={onBuyNow}
-          onViewDetails={handleViewProductDetails}
-        />
-      </main>
+      <div className="pt-[170px]">
+        <main className="container mx-auto px-4 pb-6">
+          <ProductGrid
+            products={products}
+            onAddToCart={onAddToCart}
+            onBuyNow={onBuyNow}
+            onViewDetails={handleViewProductDetails}
+          />
+        </main>
+      </div>
 
       {selectedProduct && (
         <ProductDetailOverlay
