@@ -1,39 +1,17 @@
-import { useState, useEffect, useMemo } from "react";
+
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { mockProducts, mockCategories } from "@/lib/mockData";
 import { Product } from "@/types";
-import ProductDetailOverlay from "@/components/product/ProductDetailOverlay";
-import CategoryFilter from "@/components/CategoryFilter";
-import SearchBar from "@/components/product/SearchBar";
-import ProductGrid from "@/components/product/ProductGrid";
 import Header from "@/components/layout/Header";
 import { Logo } from "@/components/Logo";
 import { useToast } from "@/components/ui/use-toast";
-import { Switch } from "@/components/ui/switch";
-import { Leaf } from "lucide-react";
-
-const searchProducts = (query: string, products: Product[]): Promise<Product[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (!query.trim()) {
-        resolve([]);
-        return;
-      }
-      
-      const lowercaseQuery = query.toLowerCase();
-      const filtered = products.filter(
-        product => 
-          product.active !== false && (
-            product.name.toLowerCase().includes(lowercaseQuery) || 
-            product.description.toLowerCase().includes(lowercaseQuery) ||
-            product.categories.some(cat => cat.name.toLowerCase().includes(lowercaseQuery))
-          )
-      );
-      resolve(filtered);
-    }, 300);
-  });
-};
+import ProductSearchHeader from "@/components/product/ProductSearchHeader";
+import ProductFilterSection from "@/components/product/ProductFilterSection";
+import ProductsContainer from "@/components/product/ProductsContainer";
+import useProductFiltering from "@/hooks/useProductFiltering";
+import useProductSearch from "@/hooks/useProductSearch";
 
 const ProductsPage = () => {
   const { user, loading, logout } = useAuth();
@@ -41,63 +19,26 @@ const ProductsPage = () => {
   const { toast } = useToast();
   
   const [products] = useState<Product[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(
-    mockProducts.filter(p => p.active !== false)
-  );
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cartItems, setCartItems] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [veganOnly, setVeganOnly] = useState<boolean>(false);
+  
+  // Custom hooks for product filtering and search
+  const { filteredProducts } = useProductFiltering({
+    products,
+    selectedCategory,
+    searchQuery,
+    veganOnly
+  });
+  
+  const { searchSuggestions, isSearching } = useProductSearch(products, searchQuery);
   
   useEffect(() => {
     if (!loading && !user) {
       navigate("/");
     }
   }, [user, loading, navigate]);
-  
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (searchQuery.trim().length > 0) {
-        setIsSearching(true);
-        const suggestions = await searchProducts(searchQuery, products);
-        setSearchSuggestions(suggestions);
-        setIsSearching(false);
-      } else {
-        setSearchSuggestions([]);
-      }
-    };
-    
-    const debounceTimer = setTimeout(fetchSuggestions, 300);
-    
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery, products]);
-  
-  useEffect(() => {
-    let results = products.filter(p => p.active !== false);
-    
-    if (veganOnly) {
-      results = results.filter(product => product.isVegan === true);
-    }
-    
-    if (selectedCategory !== null) {
-      results = results.filter(product => 
-        product.categories.some(category => category.id === selectedCategory)
-      );
-    }
-    
-    if (searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      results = results.filter(product => 
-        product.name.toLowerCase().includes(query) || 
-        product.description.toLowerCase().includes(query)
-      );
-    }
-    
-    setFilteredProducts(results);
-  }, [selectedCategory, searchQuery, products, veganOnly]);
   
   const handleAddToCart = (product: Product) => {
     setCartItems(prev => [...prev, product]);
@@ -124,28 +65,14 @@ const ProductsPage = () => {
     setSelectedCategory(categoryId);
   };
   
-  const handleViewProductDetails = (product: Product) => {
-    setSelectedProduct(product);
-    document.body.style.overflow = 'hidden';
-  };
-  
-  const handleCloseProductDetails = () => {
-    setSelectedProduct(null);
-    document.body.style.overflow = '';
+  const handleSelectProductFromSearch = (product: Product) => {
+    setSearchQuery(product.name);
+    // Products container will handle viewing details
   };
   
   const handleLogout = async () => {
     await logout();
     navigate("/");
-  };
-
-  const handleSelectProductFromSearch = (product: Product) => {
-    setSearchQuery(product.name);
-    handleViewProductDetails(product);
-  };
-  
-  const handleVeganToggle = (checked: boolean) => {
-    setVeganOnly(checked);
   };
   
   if (loading) {
@@ -167,55 +94,28 @@ const ProductsPage = () => {
           onLogout={handleLogout}
         />
         
-        <div className="container mx-auto px-4 py-2 border-t">
-          <div className="flex items-center gap-4">
-            <SearchBar 
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search products..."
-              suggestions={searchSuggestions}
-              isLoading={isSearching}
-              onSelectProduct={handleSelectProductFromSearch}
-              className="flex-1"
-            />
-            <div className="flex items-center gap-2">
-              <Leaf className={`h-5 w-5 transition-colors ${veganOnly ? 'text-green-600' : 'text-gray-400'}`} />
-              <Switch 
-                checked={veganOnly} 
-                onCheckedChange={handleVeganToggle}
-                className={`${veganOnly ? 'bg-green-600' : ''} data-[state=checked]:bg-green-600`}
-              />
-              <span className="text-sm font-medium">Vegan</span>
-            </div>
-          </div>
-        </div>
+        <ProductSearchHeader
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          veganOnly={veganOnly}
+          setVeganOnly={setVeganOnly}
+          searchSuggestions={searchSuggestions}
+          isSearching={isSearching}
+          onSelectProduct={handleSelectProductFromSearch}
+        />
         
-        <div className="container mx-auto px-4 py-2 border-t">
-          <CategoryFilter 
-            categories={mockCategories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={handleSelectCategory}
-          />
-        </div>
+        <ProductFilterSection
+          categories={mockCategories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleSelectCategory}
+        />
       </header>
       
-      <main className="container mx-auto px-4 pt-40 pb-6">
-        <ProductGrid
-          products={filteredProducts}
-          onAddToCart={handleAddToCart}
-          onBuyNow={handleBuyNow}
-          onViewDetails={handleViewProductDetails}
-        />
-      </main>
-      
-      {selectedProduct && (
-        <ProductDetailOverlay
-          product={selectedProduct}
-          onClose={handleCloseProductDetails}
-          onAddToCart={handleAddToCart}
-          onBuyNow={handleBuyNow}
-        />
-      )}
+      <ProductsContainer
+        products={filteredProducts}
+        onAddToCart={handleAddToCart}
+        onBuyNow={handleBuyNow}
+      />
     </div>
   );
 };
