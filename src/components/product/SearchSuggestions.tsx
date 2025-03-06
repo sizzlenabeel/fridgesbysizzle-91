@@ -26,7 +26,8 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
 
   return (
     <div className={cn(
-      "absolute top-full left-0 right-0 mt-1 bg-white rounded-md shadow-lg z-50 max-h-80 overflow-y-auto",
+      "absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg z-50 max-h-80 overflow-y-auto w-[calc(100%+6rem)]",
+      "max-w-[500px] -translate-x-[3rem]",
       className
     )}>
       {isLoading ? (
