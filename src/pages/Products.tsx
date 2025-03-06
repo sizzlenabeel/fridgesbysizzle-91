@@ -88,7 +88,7 @@ const ProductsPage = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 bg-white z-10 border-b">
+      <header className="fixed top-0 left-0 right-0 bg-white z-10 border-b shadow-sm">
         <Header 
           cartItemsCount={cartItems.length}
           onLogout={handleLogout}
