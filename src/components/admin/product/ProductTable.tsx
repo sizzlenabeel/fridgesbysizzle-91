@@ -53,7 +53,11 @@ const ProductTable: React.FC<ProductTableProps> = ({
             </TableRow>
           ) : (
             products.map((product) => (
-              <TableRow key={product.id} className={product.active === false ? "bg-gray-50" : ""}>
+              <TableRow 
+                key={product.id} 
+                className={`${product.active === false ? "bg-gray-50" : ""} cursor-pointer hover:bg-gray-100`}
+                onClick={() => onEditProduct(product)}
+              >
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>
                   {product.discountedPrice ? (
@@ -95,12 +99,15 @@ const ProductTable: React.FC<ProductTableProps> = ({
                     {product.active === false ? "Inactive" : "Active"}
                   </span>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex justify-end items-center space-x-2">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onManageInventory(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onManageInventory(product);
+                      }}
                       title="Manage Inventory"
                     >
                       <Building2 className="h-4 w-4" />
@@ -108,7 +115,10 @@ const ProductTable: React.FC<ProductTableProps> = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onToggleActive(product.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleActive(product.id);
+                      }}
                       title={product.active === false ? "Activate" : "Deactivate"}
                     >
                       {product.active === false ? (
@@ -120,7 +130,10 @@ const ProductTable: React.FC<ProductTableProps> = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onEditProduct(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditProduct(product);
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>

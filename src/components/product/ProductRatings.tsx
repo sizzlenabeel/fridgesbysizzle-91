@@ -6,7 +6,6 @@ interface ProductRatingsProps {
   ratings: {
     heart: number;
     thumbsUp: number;
-    alright: number;
     thumbsDown: number;
   };
   size?: "sm" | "md";

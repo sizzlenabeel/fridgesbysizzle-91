@@ -39,8 +39,8 @@ import { mockCategories } from "@/lib/mockData";
 const mockDiscountRules: DiscountRule[] = [
   {
     id: "disc1",
-    name: "Near Expiry",
-    description: "Products nearing expiry date get 20% off",
+    name: "Near Best Before Date",
+    description: "Products near best before date get 20% off",
     type: "percentage",
     value: 20,
     conditions: {
@@ -308,7 +308,7 @@ const DiscountRules = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="daysBeforeExpiry">Days Before Expiry (optional)</Label>
+                <Label htmlFor="daysBeforeExpiry">Days Before Best Before Date (optional)</Label>
                 <Input
                   id="daysBeforeExpiry"
                   name="daysBeforeExpiry"
@@ -391,7 +391,11 @@ const DiscountRules = () => {
               </TableRow>
             ) : (
               filteredRules.map((rule) => (
-                <TableRow key={rule.id}>
+                <TableRow 
+                  key={rule.id}
+                  className="cursor-pointer hover:bg-gray-100"
+                  onClick={() => openEditDialog(rule)}
+                >
                   <TableCell className="font-medium">{rule.name}</TableCell>
                   <TableCell className="hidden md:table-cell">
                     {rule.description}
@@ -411,7 +415,7 @@ const DiscountRules = () => {
                       {rule.conditions.daysBeforeExpiry && (
                         <span className="inline-flex items-center text-xs">
                           <Calendar className="h-3 w-3 mr-1" />
-                          {rule.conditions.daysBeforeExpiry} days before expiry
+                          {rule.conditions.daysBeforeExpiry} days before best before date
                         </span>
                       )}
                       {rule.conditions.categoryIds?.map((catId) => {
@@ -435,12 +439,15 @@ const DiscountRules = () => {
                       {rule.active ? "Active" : "Inactive"}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end items-center space-x-2">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => toggleRuleActive(rule.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleRuleActive(rule.id);
+                        }}
                         title={rule.active ? "Deactivate" : "Activate"}
                       >
                         {rule.active ? (
@@ -452,14 +459,20 @@ const DiscountRules = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => openEditDialog(rule)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditDialog(rule);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => deleteRule(rule.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteRule(rule.id);
+                        }}
                       >
                         <Trash className="h-4 w-4 text-red-500" />
                       </Button>

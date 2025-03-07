@@ -24,7 +24,6 @@ export interface ProductFormData {
   isVegan: boolean;
   ingredients: string;
   bestBeforeDate: string;
-  dueDate: string;
   selectedCategories: string[];
   selectedAllergens: string[];
 }
@@ -45,9 +44,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
     ingredients: product?.ingredients.join(", ") || "",
     bestBeforeDate: product?.bestBeforeDate 
       ? new Date(product.bestBeforeDate).toISOString().split('T')[0] 
-      : "",
-    dueDate: product?.dueDate 
-      ? new Date(product.dueDate).toISOString().split('T')[0] 
       : "",
     selectedCategories: product?.categories.map(cat => cat.id) || [],
     selectedAllergens: product?.allergens || []
@@ -109,7 +105,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
       
       <DateFields
         bestBeforeDate={form.bestBeforeDate}
-        dueDate={form.dueDate}
         onInputChange={handleInputChange}
       />
       
