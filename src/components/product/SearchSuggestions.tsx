@@ -26,7 +26,8 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
 
   return (
     <div className={cn(
-      "absolute top-full left-0 right-0 mt-1 bg-white rounded-md shadow-lg z-50 max-h-80 overflow-y-auto",
+      "absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg z-50 max-h-80 overflow-y-auto",
+      "w-full min-w-full md:min-w-[500px] md:max-w-[500px]", // Make suggestions wider on larger screens
       className
     )}>
       {isLoading ? (
@@ -55,11 +56,11 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
                   }}
                 />
               </div>
-              <div className="flex-1 truncate">
+              <div className="flex-1 min-w-0">
                 <div className="font-medium flex items-center gap-1">
                   {product.name}
                   {product.isVegan && (
-                    <Leaf className="h-3 w-3 text-green-600" />
+                    <Leaf className="h-3 w-3 text-green-600 flex-shrink-0" />
                   )}
                 </div>
                 <div className="text-sm text-muted-foreground truncate">
@@ -67,7 +68,7 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
                   {product.description.length > 60 ? '...' : ''}
                 </div>
               </div>
-              <div className="text-sizzle-600 font-semibold">
+              <div className="text-sizzle-600 font-semibold whitespace-nowrap ml-2">
                 {product.discountedPrice ? (
                   <>
                     <span className="line-through text-gray-400 mr-1 text-sm">

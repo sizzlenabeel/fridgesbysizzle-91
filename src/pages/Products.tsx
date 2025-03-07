@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -159,9 +160,14 @@ const ProductsPage = () => {
     );
   }
   
+  // Calculate the header height to determine proper padding for main content
+  // This includes the main header, search bar, and category filter
+  const headerHeight = 'header-height';
+  
   return (
     <div className="min-h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 bg-white z-10 border-b">
+      {/* Fixed header with higher z-index and more visible shadow */}
+      <header className="fixed top-0 left-0 right-0 bg-white z-50 border-b shadow-md">
         <Header 
           cartItemsCount={cartItems.length}
           onLogout={handleLogout}
@@ -199,7 +205,8 @@ const ProductsPage = () => {
         </div>
       </header>
       
-      <main className="container mx-auto px-4 pt-40 pb-6">
+      {/* Main content with sufficient top padding to prevent overlap with fixed header */}
+      <main className="container mx-auto px-4 pt-48 pb-6">
         <ProductGrid
           products={filteredProducts}
           onAddToCart={handleAddToCart}
