@@ -113,7 +113,6 @@ export const useProductManagement = (initialProducts: Product[]) => {
                 ingredients: formData.ingredients.split(",").map(i => i.trim()),
                 allergens: formData.selectedAllergens,
                 bestBeforeDate: formData.bestBeforeDate || new Date().toISOString(),
-                dueDate: formData.dueDate || undefined,
                 categories: mockCategories.filter(cat => formData.selectedCategories.includes(cat.id))
               }
             : product
@@ -134,7 +133,6 @@ export const useProductManagement = (initialProducts: Product[]) => {
         allergens: formData.selectedAllergens,
         categories: mockCategories.filter(cat => formData.selectedCategories.includes(cat.id)),
         bestBeforeDate: formData.bestBeforeDate || new Date(Date.now() + 86400000 * 7).toISOString(), // Default to 7 days from now
-        dueDate: formData.dueDate || undefined,
         ratings: { heart: 0, thumbsUp: 0, alright: 0, thumbsDown: 0 },
         locationInventory: { }, // Empty initially
         active: true
