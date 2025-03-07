@@ -7,14 +7,22 @@ import { AuthCard } from "@/components/AuthCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showPWAPrompt, setShowPWAPrompt] = useState(false);
-  const { login, loading, user } = useAuth();
+  const [selectedLocationId, setSelectedLocationId] = useState("");
+  const { login, loading, user, locations } = useAuth();
   const navigate = useNavigate();
   
   // Check if user is already logged in
@@ -34,29 +42,16 @@ const LoginPage = () => {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const handleGuestContinue = () => {
+    if (!selectedLocationId) return;
+    
+    // Store the selected location in localStorage for guest users
+    localStorage.setItem("guestLocationId", selectedLocationId);
+    navigate("/products");
   };
 
-  // PWA installation prompt
-  useEffect(() => {
-    // Show PWA prompt after a delay
-    const timer = setTimeout(() => {
-      // Check if app is already installed
-      // This is a simplified check - in reality you would use more robust detection
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      if (!isStandalone) {
-        setShowPWAPrompt(true);
-      }
-    }, 3000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleInstallClick = () => {
-    // In a real app, this would trigger the PWA installation
-    // For now we just hide the prompt
-    setShowPWAPrompt(false);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
   
   return (
@@ -139,43 +134,42 @@ const LoginPage = () => {
               </Link>
             </div>
           </form>
+          
+          <div className="mt-6">
+            <Separator className="my-4">
+              <span className="mx-2 text-xs text-muted-foreground">OR</span>
+            </Separator>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="guest-location">Select a location to continue as guest</Label>
+                <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
+                  <SelectTrigger id="guest-location" className="h-12">
+                    <SelectValue placeholder="Select a location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((location) => (
+                      <SelectItem key={location.id} value={location.id}>
+                        {location.name}, {location.city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button 
+                type="button" 
+                variant="outline"
+                className="w-full h-12"
+                disabled={!selectedLocationId}
+                onClick={handleGuestContinue}
+              >
+                Continue as Guest
+              </Button>
+            </div>
+          </div>
         </AuthCard>
       </div>
-      
-      {/* PWA Installation Prompt */}
-      {showPWAPrompt && (
-        <div className="fixed bottom-4 left-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-700 animate-slide-up">
-          <div className="flex justify-between items-center">
-            <div className="font-medium">Install sizzle! app</div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0" 
-              onClick={() => setShowPWAPrompt(false)}
-            >
-              ✕
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground my-2">
-            Install our app for a better experience and offline access
-          </p>
-          <div className="flex gap-2 mt-2">
-            <Button 
-              variant="outline" 
-              className="flex-1"
-              onClick={() => setShowPWAPrompt(false)}
-            >
-              Later
-            </Button>
-            <Button 
-              className="flex-1 bg-sizzle-600 hover:bg-sizzle-700 text-white"
-              onClick={handleInstallClick}
-            >
-              Install
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

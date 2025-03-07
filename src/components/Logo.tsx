@@ -1,10 +1,13 @@
+
 import { cn } from "@/lib/utils";
+
 type LogoProps = {
   className?: string;
   textClassName?: string;
   showText?: boolean;
   size?: "sm" | "md" | "lg";
 };
+
 export function Logo({
   className,
   textClassName,
@@ -21,15 +24,23 @@ export function Logo({
     md: "text-xl",
     lg: "text-2xl"
   };
-  return <div className={cn("flex items-center gap-2", className)}>
+  
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
       <div className={cn("relative", sizeClasses[size])}>
-        <div className="absolute inset-0 bg-sizzle-600 rounded-full animate-pulse opacity-50"></div>
         <div className={cn("flex items-center justify-center bg-sizzle-600 text-white font-bold rounded-full", sizeClasses[size])}>
-          <span className="relative -top-0.5">s!</span>
+          <img 
+            src="/lovable-uploads/55d0b2c2-9e61-4fae-8121-66bd8516ed65.png" 
+            alt="sizzle!" 
+            className="w-full h-full object-cover rounded-full"
+          />
         </div>
       </div>
-      {showText && <span className={cn("font-bold tracking-tight", textSizeClasses[size], textClassName)}>
+      {showText && (
+        <span className={cn("font-bold tracking-tight", textSizeClasses[size], textClassName)}>
           sizzle<span className="text-slate-950">!</span>
-        </span>}
-    </div>;
+        </span>
+      )}
+    </div>
+  );
 }

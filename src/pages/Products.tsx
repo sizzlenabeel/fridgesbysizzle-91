@@ -37,7 +37,7 @@ const searchProducts = (query: string, products: Product[]): Promise<Product[]> 
 };
 
 const ProductsPage = () => {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, isGuest, guestLocationId } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -54,10 +54,10 @@ const ProductsPage = () => {
   const [veganOnly, setVeganOnly] = useState<boolean>(false);
   
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && !isGuest) {
       navigate("/");
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isGuest, navigate]);
   
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -207,6 +207,14 @@ const ProductsPage = () => {
       
       {/* Main content with sufficient top padding to prevent overlap with fixed header */}
       <main className="container mx-auto px-4 pt-48 pb-6">
+        {isGuest && (
+          <div className="bg-slate-100 mb-6 p-4 rounded-lg text-center">
+            <p className="text-gray-600">
+              You're browsing as a guest. <Link to="/" className="text-sizzle-600 font-medium">Sign in</Link> to save your orders and preferences.
+            </p>
+          </div>
+        )}
+        
         <ProductGrid
           products={filteredProducts}
           onAddToCart={handleAddToCart}

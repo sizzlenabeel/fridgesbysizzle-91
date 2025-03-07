@@ -12,7 +12,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, Heart, ThumbsUp, Check, ThumbsDown, UserRound } from "lucide-react";
+import { ArrowLeft, Heart, ThumbsUp, ThumbsDown, UserRound } from "lucide-react";
 import { Order, Product, ProductRating } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
@@ -39,7 +39,6 @@ const mockOrders: Order[] = [
           ratings: {
             heart: 25,
             thumbsUp: 15,
-            alright: 5,
             thumbsDown: 2
           },
           locationInventory: {
@@ -73,7 +72,6 @@ const mockOrders: Order[] = [
           ratings: {
             heart: 18,
             thumbsUp: 12,
-            alright: 8,
             thumbsDown: 1
           },
           locationInventory: {
@@ -97,7 +95,6 @@ const mockOrders: Order[] = [
           ratings: {
             heart: 30,
             thumbsUp: 10,
-            alright: 5,
             thumbsDown: 0
           },
           locationInventory: {
@@ -160,8 +157,6 @@ const Profile = () => {
         return <Heart className="h-5 w-5 text-red-500" />;
       case "thumbsUp":
         return <ThumbsUp className="h-5 w-5 text-blue-500" />;
-      case "alright":
-        return <Check className="h-5 w-5 text-green-500" />;
       case "thumbsDown":
         return <ThumbsDown className="h-5 w-5 text-gray-500" />;
     }
@@ -300,7 +295,7 @@ const Profile = () => {
                           <div className="mt-auto">
                             <p className="text-sm font-medium mb-2">Rate this product:</p>
                             <div className="flex gap-2">
-                              {(['heart', 'thumbsUp', 'alright', 'thumbsDown'] as ProductRating[]).map((rating) => (
+                              {(['heart', 'thumbsUp', 'thumbsDown'] as ProductRating[]).map((rating) => (
                                 <button 
                                   key={rating}
                                   onClick={() => rateProduct(item.product.id, rating)}

@@ -19,6 +19,8 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   locations: Location[];
+  isGuest: boolean;
+  guestLocationId: string | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
@@ -33,21 +35,35 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestLocationId, setGuestLocationId] = useState<string | null>(null);
   const navigate = useNavigate();
   const locations = mockLocations;
 
   useEffect(() => {
-    // Check for user in local storage on initial load
+    // Check for user or guest in local storage on initial load
     const storedUser = localStorage.getItem("user");
+    const storedGuestLocationId = localStorage.getItem("guestLocationId");
+    
     if (storedUser) {
       setUser(JSON.parse(storedUser));
+      setIsGuest(false);
+    } else if (storedGuestLocationId) {
+      setIsGuest(true);
+      setGuestLocationId(storedGuestLocationId);
     }
+    
     setLoading(false);
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
     setLoading(true);
     try {
+      // Clear any guest session
+      localStorage.removeItem("guestLocationId");
+      setIsGuest(false);
+      setGuestLocationId(null);
+      
       const user = await fakeLogin(credentials);
       setUser(user);
       localStorage.setItem("user", JSON.stringify(user));
@@ -69,6 +85,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const register = async (credentials: RegisterCredentials) => {
     setLoading(true);
     try {
+      // Clear any guest session
+      localStorage.removeItem("guestLocationId");
+      setIsGuest(false);
+      setGuestLocationId(null);
+      
       const user = await fakeRegister(credentials);
       setUser(user);
       localStorage.setItem("user", JSON.stringify(user));
@@ -85,7 +106,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     setUser(null);
+    setIsGuest(false);
+    setGuestLocationId(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("guestLocationId");
     navigate("/");
   };
 
@@ -93,6 +117,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     user,
     loading,
     locations,
+    isGuest,
+    guestLocationId,
     login,
     register,
     logout,

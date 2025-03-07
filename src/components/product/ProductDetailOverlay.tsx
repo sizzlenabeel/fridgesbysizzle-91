@@ -74,82 +74,77 @@ const ProductDetailOverlay: React.FC<ProductDetailOverlayProps> = ({
         ref={modalRef}
         className="bg-white rounded-lg shadow-xl w-full max-w-lg flex flex-col max-h-[90vh] relative animate-scale-in"
       >
-        {/* Close button */}
-        <button 
-          onClick={onClose}
-          className="absolute top-2 right-2 z-10 bg-white rounded-full p-1 shadow-md"
-          aria-label="Close"
-        >
-          <X className="h-5 w-5 text-gray-500" />
-        </button>
+        {/* Product image with repositioned close button */}
+        <div className="relative w-full" style={{ maxHeight: '40vh' }}>
+          <img 
+            src={product.image} 
+            alt={product.name}
+            className="w-full object-cover"
+            style={{ height: '40vh' }}
+          />
+          {product.isVegan && (
+            <span className="absolute top-3 left-3 bg-green-600 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+              Vegan
+            </span>
+          )}
+          
+          {/* Repositioned close button to middle right */}
+          <button 
+            onClick={onClose}
+            className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-white rounded-full p-1.5 shadow-lg z-10"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 text-gray-900" />
+          </button>
+        </div>
         
-        <div className="overflow-y-auto flex-1 scrollbar-hide">
-          {/* Product image - taking up approximately 40% of the height */}
-          <div className="relative w-full" style={{ maxHeight: '40vh' }}>
-            <img 
-              src={product.image} 
-              alt={product.name}
-              className="w-full object-cover"
-              style={{ height: '40vh' }}
+        {/* Product details */}
+        <div className="p-5 overflow-y-auto">
+          <h2 className="text-xl font-semibold text-gray-800">{product.name}</h2>
+          
+          <ProductRatings ratings={product.ratings} />
+          
+          <p className="text-gray-600 mt-3">{product.description}</p>
+          
+          <div className="flex items-center mt-4">
+            <ProductPrice 
+              price={product.price} 
+              discountedPrice={product.discountedPrice} 
             />
-            {product.isVegan && (
-              <span className="absolute top-3 left-3 bg-green-600 text-white text-xs font-medium px-2 py-0.5 rounded-full">
-                Vegan
-              </span>
-            )}
+            <div className="ml-auto">
+              <ProductStockIndicator stockLevel={stockLevel} />
+            </div>
           </div>
           
-          {/* Product details */}
-          <div className="p-5">
-            <h2 className="text-xl font-semibold text-gray-800">{product.name}</h2>
-            
-            <ProductRatings ratings={product.ratings} />
-            
-            <p className="text-gray-600 mt-3">{product.description}</p>
-            
-            <div className="flex items-center mt-4">
-              <ProductPrice 
-                price={product.price} 
-                discountedPrice={product.discountedPrice} 
-              />
-              <div className="ml-auto">
-                <ProductStockIndicator stockLevel={stockLevel} />
-              </div>
-            </div>
-            
-            <div className="mt-5">
-              <h3 className="font-medium text-gray-800">Best Before Date</h3>
-              <p className="text-gray-600 text-sm mt-1">{formattedDate}</p>
-            </div>
-            
-            {product.ingredients.length > 0 && (
-              <div className="mt-5">
-                <h3 className="font-medium text-gray-800">Ingredients</h3>
-                <p className="text-gray-600 text-sm mt-1">
-                  {product.ingredients.join(', ')}
-                </p>
-              </div>
-            )}
-            
-            {product.allergens.length > 0 && (
-              <div className="mt-5">
-                <h3 className="font-medium text-gray-800">Allergens</h3>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {product.allergens.map((allergen, index) => (
-                    <span 
-                      key={index} 
-                      className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded"
-                    >
-                      {allergen}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Add padding at the bottom for the fixed buttons */}
-            <div className="h-24"></div>
+          <div className="mt-5">
+            <h3 className="font-medium text-gray-800">Best Before Date</h3>
+            <p className="text-gray-600 text-sm mt-1">{formattedDate}</p>
           </div>
+          
+          {product.ingredients.length > 0 && (
+            <div className="mt-5">
+              <h3 className="font-medium text-gray-800">Ingredients</h3>
+              <p className="text-gray-600 text-sm mt-1">
+                {product.ingredients.join(', ')}
+              </p>
+            </div>
+          )}
+          
+          {product.allergens.length > 0 && (
+            <div className="mt-5">
+              <h3 className="font-medium text-gray-800">Allergens</h3>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {product.allergens.map((allergen, index) => (
+                  <span 
+                    key={index} 
+                    className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded"
+                  >
+                    {allergen}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Fixed buttons at the bottom */}
