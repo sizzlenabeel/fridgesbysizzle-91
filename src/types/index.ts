@@ -1,3 +1,4 @@
+
 export type Location = {
   id: string;
   name: string;
@@ -62,6 +63,7 @@ export type LoginCredentials = {
 
 export type RegisterCredentials = LoginCredentials & {
   primaryLocationId: string;
+  marketingConsent?: boolean;
 };
 
 export type DiscountRule = {
