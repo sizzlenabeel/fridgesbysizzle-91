@@ -59,6 +59,19 @@ const ProductsPage = () => {
     }
   }, [user, loading, isGuest, navigate]);
   
+  // Filter products by guest location if applicable
+  useEffect(() => {
+    if (isGuest && guestLocationId) {
+      // Only show products available at the guest's selected location
+      setFilteredProducts(prev => 
+        prev.filter(product => 
+          product.locationInventory[guestLocationId] && 
+          product.locationInventory[guestLocationId] > 0
+        )
+      );
+    }
+  }, [isGuest, guestLocationId]);
+  
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.trim().length > 0) {
@@ -97,8 +110,15 @@ const ProductsPage = () => {
       );
     }
     
+    if (isGuest && guestLocationId) {
+      results = results.filter(product => 
+        product.locationInventory[guestLocationId] && 
+        product.locationInventory[guestLocationId] > 0
+      );
+    }
+    
     setFilteredProducts(results);
-  }, [selectedCategory, searchQuery, products, veganOnly]);
+  }, [selectedCategory, searchQuery, products, veganOnly, isGuest, guestLocationId]);
   
   const handleAddToCart = (product: Product) => {
     setCartItems(prev => [...prev, product]);
@@ -210,7 +230,7 @@ const ProductsPage = () => {
         {isGuest && (
           <div className="bg-slate-100 mb-6 p-4 rounded-lg text-center">
             <p className="text-gray-600">
-              You're browsing as a guest. <Link to="/" className="text-sizzle-600 font-medium">Sign in</Link> to save your orders and preferences.
+              You're browsing as a guest. <Link to="/" className="text-sizzle-600 font-medium">Sign in</Link> or <Link to="/register" className="text-sizzle-600 font-medium">register</Link> to save your orders and preferences.
             </p>
           </div>
         )}

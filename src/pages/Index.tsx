@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "@/components/Logo";
@@ -7,49 +6,44 @@ import { AuthCard } from "@/components/AuthCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const LoginPage = () => {
+const IndexPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedLocationId, setSelectedLocationId] = useState("");
-  const { login, loading, user, locations } = useAuth();
-  const navigate = useNavigate();
+  const [guestLocationId, setGuestLocationId] = useState("");
+  const [showGuestOptions, setShowGuestOptions] = useState(false);
   
-  // Check if user is already logged in
-  useEffect(() => {
-    if (user) {
-      navigate("/products");
-    }
-  }, [user, navigate]);
+  const { login, loading, continueAsGuest, locations } = useAuth();
+  const navigate = useNavigate();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await login({ email, password });
-      navigate("/products");
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login failed:", error);
+      // Handle error
     }
   };
-
-  const handleGuestContinue = () => {
-    if (!selectedLocationId) return;
+  
+  const handleGuestContinue = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!guestLocationId) {
+      // Show error or focus location select
+      return;
+    }
     
-    // Store the selected location in localStorage for guest users
-    localStorage.setItem("guestLocationId", selectedLocationId);
-    navigate("/products");
+    try {
+      await continueAsGuest(guestLocationId);
+    } catch (error) {
+      console.error("Guest continue failed:", error);
+      // Handle error
+    }
   };
-
+  
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -59,12 +53,12 @@ const LoginPage = () => {
       <div className="w-full max-w-md animate-slide-down">
         <div className="flex flex-col items-center mb-8">
           <Logo size="lg" className="mb-2" />
-          <p className="text-muted-foreground">Welcome to the self-service fridge app</p>
+          <p className="text-muted-foreground">Welcome to sizzle!</p>
         </div>
         
         <AuthCard 
-          title="Sign in to your account" 
-          description="Enter your email and password to access your account"
+          title="Welcome back" 
+          description="Enter your credentials to sign in"
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -81,12 +75,7 @@ const LoginPage = () => {
             </div>
             
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link to="/reset-password" className="text-sm text-sizzle-600 hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -127,24 +116,32 @@ const LoginPage = () => {
               )}
             </Button>
             
-            <div className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-sizzle-600 hover:underline font-medium">
-                Create one
-              </Link>
+            <div className="relative my-3">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">or</span>
+              </div>
             </div>
-          </form>
-          
-          <div className="mt-6">
-            <Separator className="my-4">
-              <span className="mx-2 text-xs text-muted-foreground">OR</span>
-            </Separator>
             
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="guest-location">Select a location to continue as guest</Label>
-                <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
-                  <SelectTrigger id="guest-location" className="h-12">
+            {!showGuestOptions ? (
+              <Button 
+                type="button" 
+                variant="outline"
+                className="w-full" 
+                onClick={() => setShowGuestOptions(true)}
+              >
+                Continue as Guest
+              </Button>
+            ) : (
+              <div className="space-y-3 border p-3 rounded-lg">
+                <p className="text-sm font-medium">Select your location to continue as guest:</p>
+                <Select 
+                  value={guestLocationId} 
+                  onValueChange={setGuestLocationId}
+                >
+                  <SelectTrigger className="h-10">
                     <SelectValue placeholder="Select a location" />
                   </SelectTrigger>
                   <SelectContent>
@@ -155,23 +152,39 @@ const LoginPage = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    className="flex-1" 
+                    onClick={() => setShowGuestOptions(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="button" 
+                    className="flex-1 bg-sizzle-600 hover:bg-sizzle-700 text-white"
+                    disabled={!guestLocationId} 
+                    onClick={handleGuestContinue}
+                  >
+                    Continue
+                  </Button>
+                </div>
               </div>
-              
-              <Button 
-                type="button" 
-                variant="outline"
-                className="w-full h-12"
-                disabled={!selectedLocationId}
-                onClick={handleGuestContinue}
-              >
-                Continue as Guest
-              </Button>
+            )}
+            
+            <div className="text-center text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-sizzle-600 hover:underline font-medium">
+                Create an account
+              </Link>
             </div>
-          </div>
+          </form>
         </AuthCard>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default IndexPage;

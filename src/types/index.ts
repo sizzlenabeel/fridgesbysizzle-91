@@ -10,7 +10,8 @@ export type User = {
   email: string;
   primaryLocationId: string;
   createdAt: string;
-  isAdmin?: boolean;
+  isAdmin: boolean;
+  marketingConsent?: boolean;
 };
 
 export type Category = {

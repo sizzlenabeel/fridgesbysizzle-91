@@ -45,6 +45,7 @@ export const fakeRegister = async (credentials: RegisterCredentials): Promise<Us
       primaryLocationId: credentials.primaryLocationId,
       createdAt: new Date().toISOString(),
       isAdmin: true,
+      marketingConsent: credentials.marketingConsent || false,
     };
   }
   
@@ -54,5 +55,6 @@ export const fakeRegister = async (credentials: RegisterCredentials): Promise<Us
     primaryLocationId: credentials.primaryLocationId,
     createdAt: new Date().toISOString(),
     isAdmin: false,
+    marketingConsent: credentials.marketingConsent || false,
   };
 };

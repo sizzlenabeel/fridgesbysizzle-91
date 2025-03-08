@@ -24,6 +24,7 @@ type AuthContextType = {
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  continueAsGuest: (locationId: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -104,6 +105,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const continueAsGuest = async (locationId: string) => {
+    setLoading(true);
+    try {
+      // Clear any user session
+      localStorage.removeItem("user");
+      setUser(null);
+      
+      // Set guest session
+      localStorage.setItem("guestLocationId", locationId);
+      setGuestLocationId(locationId);
+      setIsGuest(true);
+      
+      // Redirect to products page
+      navigate("/products");
+    } catch (error) {
+      console.error("Guest login failed:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     setUser(null);
     setIsGuest(false);
@@ -122,6 +145,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     login,
     register,
     logout,
+    continueAsGuest,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

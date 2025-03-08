@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const RegisterPage = () => {
@@ -15,11 +16,17 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [primaryLocationId, setPrimaryLocationId] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const { register, loading, locations } = useAuth();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register({ email, password, primaryLocationId });
+    await register({ 
+      email, 
+      password, 
+      primaryLocationId,
+      marketingConsent 
+    });
   };
   
   const togglePasswordVisibility = () => {
@@ -103,6 +110,26 @@ const RegisterPage = () => {
               <p className="text-xs text-muted-foreground">
                 This is where you'll usually buy your products
               </p>
+            </div>
+            
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="marketing" 
+                checked={marketingConsent}
+                onCheckedChange={(checked) => setMarketingConsent(checked as boolean)}
+                className="mt-1"
+              />
+              <div className="space-y-1">
+                <Label 
+                  htmlFor="marketing" 
+                  className="font-normal"
+                >
+                  Send me updates about new products and promotions
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  We respect your privacy. Your information will never be shared with third parties or used for identification purposes other than for processing your purchases.
+                </p>
+              </div>
             </div>
             
             <Button 

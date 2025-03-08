@@ -35,7 +35,7 @@ interface CartSheetProps {
 const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) => {
   const [cartItems, setCartItems] = useState<CartItemType[]>(mockCartItems);
   const [appliedPromo, setAppliedPromo] = useState<{code: string, discount: number} | null>(null);
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   
   // Cart functionality
   const updateQuantity = (productId: string, newQuantity: number) => {
@@ -60,6 +60,16 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) =>
   };
   
   const handleCheckout = () => {
+    if (!user && !isGuest) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in or continue as guest to checkout",
+        variant: "destructive",
+        duration: 2000,
+      });
+      return;
+    }
+    
     toast({
       title: "Proceeding to checkout",
       description: "This would redirect to Stripe Checkout in the full implementation",
@@ -121,10 +131,14 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) =>
           <div className="mt-3 text-center text-xs text-gray-500">
             {user ? (
               <p>Ordering as {user.email}</p>
+            ) : isGuest ? (
+              <p>
+                Ordering as guest. <Link to="/register" className="text-sizzle-600 hover:underline">Create an account</Link> to save your orders.
+              </p>
             ) : (
               <p>
                 <Link to="/" className="text-sizzle-600 hover:underline">Login</Link> or 
-                <Link to="/register" className="text-sizzle-600 hover:underline ml-1">Register</Link> to continue
+                <Link to="/register" className="text-sizzle-600 hover:underline ml-1">Register</Link> to checkout
               </p>
             )}
           </div>
