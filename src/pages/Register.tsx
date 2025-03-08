@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,78 +9,49 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [primaryLocationId, setPrimaryLocationId] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
-  const { register, loading, locations } = useAuth();
-  
+  const {
+    register,
+    loading,
+    locations
+  } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register({ 
-      email, 
-      password, 
+    await register({
+      email,
+      password,
       primaryLocationId,
-      marketingConsent 
+      marketingConsent
     });
   };
-  
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-background to-muted/30">
+  return <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-background to-muted/30">
       <div className="w-full max-w-md animate-slide-down">
         <div className="flex flex-col items-center mb-8">
           <Logo size="lg" className="mb-2" />
           <p className="text-muted-foreground">Create your sizzle! account</p>
         </div>
         
-        <AuthCard 
-          title="Create an account" 
-          description="Enter your details to create your account"
-        >
+        <AuthCard title="Create an account" description="Enter your details to create your account">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="h-12"
-              />
+              <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="h-12" />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-12 pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3"
-                  onClick={togglePasswordVisibility}
-                >
-                  {showPassword ? 
-                    <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
-                    <Eye className="h-5 w-5 text-muted-foreground" />
-                  }
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="h-12 pr-10" />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={togglePasswordVisibility}>
+                  {showPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -91,20 +61,14 @@ const RegisterPage = () => {
             
             <div className="space-y-2">
               <Label htmlFor="location">Primary Location</Label>
-              <Select 
-                value={primaryLocationId} 
-                onValueChange={setPrimaryLocationId}
-                required
-              >
+              <Select value={primaryLocationId} onValueChange={setPrimaryLocationId} required>
                 <SelectTrigger id="location" className="h-12">
                   <SelectValue placeholder="Select your primary location" />
                 </SelectTrigger>
                 <SelectContent>
-                  {locations.map((location) => (
-                    <SelectItem key={location.id} value={location.id}>
+                  {locations.map(location => <SelectItem key={location.id} value={location.id}>
                       {location.name}, {location.city}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
@@ -113,38 +77,18 @@ const RegisterPage = () => {
             </div>
             
             <div className="flex items-start space-x-2">
-              <Checkbox 
-                id="marketing" 
-                checked={marketingConsent}
-                onCheckedChange={(checked) => setMarketingConsent(checked as boolean)}
-                className="mt-1"
-              />
+              <Checkbox id="marketing" checked={marketingConsent} onCheckedChange={checked => setMarketingConsent(checked as boolean)} className="mt-1" />
               <div className="space-y-1">
-                <Label 
-                  htmlFor="marketing" 
-                  className="font-normal"
-                >
-                  Send me updates about new products and promotions
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  We respect your privacy. Your information will never be shared with third parties or used for identification purposes other than for processing your purchases.
-                </p>
+                <Label htmlFor="marketing" className="font-normal">Update me on new products and promotions</Label>
+                <p className="text-xs text-muted-foreground">We respect your privacy. Your information will never be shared with third parties or used for any purpose other than to process your orders. </p>
               </div>
             </div>
             
-            <Button 
-              type="submit" 
-              className="w-full h-12 bg-sizzle-600 hover:bg-sizzle-700 text-white"
-              disabled={loading || !primaryLocationId}
-            >
-              {loading ? (
-                <>
+            <Button type="submit" className="w-full h-12 bg-sizzle-600 hover:bg-sizzle-700 text-white" disabled={loading || !primaryLocationId}>
+              {loading ? <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating account...
-                </>
-              ) : (
-                "Create account"
-              )}
+                </> : "Create account"}
             </Button>
             
             <div className="text-center text-sm text-muted-foreground">
@@ -156,8 +100,6 @@ const RegisterPage = () => {
           </form>
         </AuthCard>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default RegisterPage;
