@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { mockProducts, mockCategories } from "@/lib/mockData";
 import { Product } from "@/types";
 import ProductDetailOverlay from "@/components/product/ProductDetailOverlay";

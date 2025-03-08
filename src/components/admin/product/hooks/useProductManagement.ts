@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Product } from "@/types";
 import { ProductFormData } from "../ProductForm";
@@ -133,7 +132,7 @@ export const useProductManagement = (initialProducts: Product[]) => {
         allergens: formData.selectedAllergens,
         categories: mockCategories.filter(cat => formData.selectedCategories.includes(cat.id)),
         bestBeforeDate: formData.bestBeforeDate || new Date(Date.now() + 86400000 * 7).toISOString(), // Default to 7 days from now
-        ratings: { heart: 0, thumbsUp: 0, alright: 0, thumbsDown: 0 },
+        ratings: { heart: 0, thumbsUp: 0, thumbsDown: 0 },
         locationInventory: { }, // Empty initially
         active: true
       };

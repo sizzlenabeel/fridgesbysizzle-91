@@ -19,7 +19,7 @@ export type Category = {
   description?: string;
 };
 
-export type ProductRating = "heart" | "thumbsUp" | "alright" | "thumbsDown";
+export type ProductRating = "heart" | "thumbsUp" | "thumbsDown";
 
 export type Product = {
   id: string;
