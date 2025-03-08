@@ -31,7 +31,6 @@ export const mockProducts: Product[] = [
     ratings: {
       heart: 24,
       thumbsUp: 45,
-      alright: 12,
       thumbsDown: 3
     },
     locationInventory: {
@@ -55,7 +54,6 @@ export const mockProducts: Product[] = [
     ratings: {
       heart: 35,
       thumbsUp: 28,
-      alright: 9,
       thumbsDown: 2
     },
     locationInventory: {
@@ -78,7 +76,6 @@ export const mockProducts: Product[] = [
     ratings: {
       heart: 18,
       thumbsUp: 42,
-      alright: 23,
       thumbsDown: 5
     },
     locationInventory: {
@@ -101,7 +98,6 @@ export const mockProducts: Product[] = [
     ratings: {
       heart: 32,
       thumbsUp: 56,
-      alright: 14,
       thumbsDown: 3
     },
     locationInventory: {
@@ -124,7 +120,6 @@ export const mockProducts: Product[] = [
     ratings: {
       heart: 45,
       thumbsUp: 38,
-      alright: 7,
       thumbsDown: 2
     },
     locationInventory: {
@@ -147,7 +142,6 @@ export const mockProducts: Product[] = [
     ratings: {
       heart: 58,
       thumbsUp: 32,
-      alright: 5,
       thumbsDown: 1
     },
     locationInventory: {
@@ -171,7 +165,6 @@ export const mockProducts: Product[] = [
     ratings: {
       heart: 29,
       thumbsUp: 43,
-      alright: 15,
       thumbsDown: 7
     },
     locationInventory: {
@@ -194,7 +187,6 @@ export const mockProducts: Product[] = [
     ratings: {
       heart: 65,
       thumbsUp: 42,
-      alright: 8,
       thumbsDown: 2
     },
     locationInventory: {
