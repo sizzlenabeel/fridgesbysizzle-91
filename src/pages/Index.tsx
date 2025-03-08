@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 const IndexPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +22,7 @@ const IndexPage = () => {
     locations
   } = useAuth();
   const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -33,6 +35,7 @@ const IndexPage = () => {
       // Handle error
     }
   };
+
   const handleGuestContinue = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!guestLocationId) {
@@ -46,9 +49,11 @@ const IndexPage = () => {
       // Handle error
     }
   };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
   return <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-background to-muted/30">
       <div className="w-full max-w-md animate-slide-down">
         <div className="flex flex-col items-center mb-8">
@@ -70,6 +75,11 @@ const IndexPage = () => {
                 <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={togglePasswordVisibility}>
                   {showPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
                 </Button>
+              </div>
+              <div className="flex justify-end">
+                <Link to="/forgot-password" className="text-sm text-sizzle-600 hover:underline">
+                  Forgot password?
+                </Link>
               </div>
             </div>
             
@@ -125,4 +135,5 @@ const IndexPage = () => {
       </div>
     </div>;
 };
+
 export default IndexPage;

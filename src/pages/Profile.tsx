@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -168,12 +169,18 @@ const Profile = () => {
           <UserRound className="mx-auto h-16 w-16 text-gray-300 mb-4" />
           <h1 className="text-2xl font-bold mb-2">You're not logged in</h1>
           <p className="text-gray-500 mb-6">Please login or register to view your profile.</p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild variant="outline">
               <Link to="/">Login</Link>
             </Button>
             <Button asChild className="bg-sizzle-600 hover:bg-sizzle-700">
               <Link to="/register">Register</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link to="/products">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Products
+              </Link>
             </Button>
           </div>
         </div>
