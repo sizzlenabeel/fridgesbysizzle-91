@@ -1,4 +1,3 @@
-
 export type Location = {
   id: string;
   name: string;
@@ -13,6 +12,7 @@ export type User = {
   createdAt: string;
   isAdmin: boolean;
   marketingConsent?: boolean;
+  monthlyInvoiceEnabled?: boolean;
 };
 
 export type Category = {

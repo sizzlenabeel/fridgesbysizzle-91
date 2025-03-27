@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,12 +10,12 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, Heart, ThumbsUp, ThumbsDown, UserRound } from "lucide-react";
 import { Order, Product, ProductRating } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock order history data
 const mockOrders: Order[] = [
   {
     id: "order1",
@@ -117,6 +116,9 @@ const Profile = () => {
   const [selectedLocationId, setSelectedLocationId] = useState<string>(
     user?.primaryLocationId || ""
   );
+  const [monthlyInvoiceEnabled, setMonthlyInvoiceEnabled] = useState<boolean>(
+    user?.monthlyInvoiceEnabled || false
+  );
   
   const handleLocationChange = (value: string) => {
     setSelectedLocationId(value);
@@ -125,6 +127,15 @@ const Profile = () => {
       description: "Your primary location has been updated successfully.",
     });
     // In a real implementation, this would update the user's primary location
+  };
+  
+  const handleMonthlyInvoiceToggle = (checked: boolean) => {
+    setMonthlyInvoiceEnabled(checked);
+    toast({
+      title: "Monthly invoicing " + (checked ? "enabled" : "disabled"),
+      description: "Your monthly invoicing preference has been updated successfully.",
+    });
+    // In a real implementation, this would update the user's monthly invoice setting
   };
   
   const handleLogout = async () => {
@@ -235,6 +246,19 @@ const Profile = () => {
               <p className="text-sm text-gray-500 mt-1">
                 Your primary location determines which products are available to you.
               </p>
+            </div>
+            
+            <div className="flex items-center justify-between border-t pt-4">
+              <div>
+                <h3 className="font-medium">Monthly Invoicing</h3>
+                <p className="text-sm text-gray-500">
+                  Enable to add purchases to a monthly invoice instead of paying immediately
+                </p>
+              </div>
+              <Switch
+                checked={monthlyInvoiceEnabled}
+                onCheckedChange={handleMonthlyInvoiceToggle}
+              />
             </div>
           </div>
         </div>

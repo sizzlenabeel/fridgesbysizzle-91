@@ -21,6 +21,7 @@ export const fakeLogin = async (credentials: LoginCredentials): Promise<User> =>
       primaryLocationId: "location1",
       createdAt: new Date().toISOString(),
       isAdmin: true,
+      monthlyInvoiceEnabled: false,
     };
   }
   
@@ -30,6 +31,7 @@ export const fakeLogin = async (credentials: LoginCredentials): Promise<User> =>
     primaryLocationId: "location1",
     createdAt: new Date().toISOString(),
     isAdmin: false,
+    monthlyInvoiceEnabled: false,
   };
 };
 
@@ -46,6 +48,7 @@ export const fakeRegister = async (credentials: RegisterCredentials): Promise<Us
       createdAt: new Date().toISOString(),
       isAdmin: true,
       marketingConsent: credentials.marketingConsent || false,
+      monthlyInvoiceEnabled: false,
     };
   }
   
@@ -56,5 +59,6 @@ export const fakeRegister = async (credentials: RegisterCredentials): Promise<Us
     createdAt: new Date().toISOString(),
     isAdmin: false,
     marketingConsent: credentials.marketingConsent || false,
+    monthlyInvoiceEnabled: false,
   };
 };

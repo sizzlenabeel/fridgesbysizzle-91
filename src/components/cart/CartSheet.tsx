@@ -9,11 +9,12 @@ import { toast } from "@/components/ui/use-toast";
 import { CartItem as CartItemType } from "@/types";
 import { mockProducts } from "@/lib/mockData";
 
-// Import the new components
+// Import the components
 import CartItem from "./CartItem";
 import PromoCodeSection from "./PromoCodeSection";
 import OrderSummary from "./OrderSummary";
 import EmptyCart from "./EmptyCart";
+import PaymentOptions from "./PaymentOptions";
 
 // Mock cart data for frontend development
 const mockCartItems: CartItemType[] = [
@@ -35,6 +36,7 @@ interface CartSheetProps {
 const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) => {
   const [cartItems, setCartItems] = useState<CartItemType[]>(mockCartItems);
   const [appliedPromo, setAppliedPromo] = useState<{code: string, discount: number} | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "swish" | "invoice">("card");
   const { user, isGuest } = useAuth();
   
   // Cart functionality
@@ -70,12 +72,19 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) =>
       return;
     }
     
+    // Display a different message based on payment method
+    const paymentMessages = {
+      card: "Proceeding to Stripe checkout...",
+      swish: "Redirecting to Swish payment...",
+      invoice: "Adding to your monthly invoice..."
+    };
+    
     toast({
       title: "Proceeding to checkout",
-      description: "This would redirect to Stripe Checkout in the full implementation",
+      description: paymentMessages[paymentMethod],
       duration: 2000,
     });
-    // This would redirect to Stripe Checkout in the real implementation
+    // This would redirect to the appropriate payment handler in a real implementation
   };
 
   // Custom trigger for cart icon
@@ -121,11 +130,21 @@ const CartSheet: React.FC<CartSheetProps> = ({ trigger, isFullPage = false }) =>
           {/* Order Summary */}
           <OrderSummary cartItems={cartItems} appliedPromo={appliedPromo} />
           
+          {/* Payment Options */}
+          <div className="mb-4">
+            <PaymentOptions 
+              selectedMethod={paymentMethod}
+              onChange={setPaymentMethod}
+            />
+          </div>
+          
           <Button 
             onClick={handleCheckout}
             className="w-full bg-sizzle-600 hover:bg-sizzle-700 text-white"
           >
-            Proceed to Checkout
+            {paymentMethod === "card" ? "Proceed to Stripe Checkout" : 
+             paymentMethod === "swish" ? "Pay with Swish" : 
+             "Confirm Monthly Invoice"}
           </Button>
           
           <div className="mt-3 text-center text-xs text-gray-500">
