@@ -11,10 +11,17 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, Heart, ThumbsUp, ThumbsDown, UserRound } from "lucide-react";
+import { ArrowLeft, Heart, ThumbsUp, ThumbsDown, UserRound, Info } from "lucide-react";
 import { Order, Product, ProductRating } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const mockOrders: Order[] = [
   {
@@ -119,6 +126,9 @@ const Profile = () => {
   const [monthlyInvoiceEnabled, setMonthlyInvoiceEnabled] = useState<boolean>(
     user?.monthlyInvoiceEnabled || false
   );
+  const [allergies, setAllergies] = useState<string>(
+    user?.allergies ? user.allergies.join(", ") : ""
+  );
   
   const handleLocationChange = (value: string) => {
     setSelectedLocationId(value);
@@ -130,12 +140,17 @@ const Profile = () => {
   };
   
   const handleMonthlyInvoiceToggle = (checked: boolean) => {
-    setMonthlyInvoiceEnabled(checked);
+    // This function is kept for future implementation
+    // Currently disabled through the UI
+  };
+
+  const handleAllergiesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setAllergies(e.target.value);
     toast({
-      title: "Monthly invoicing " + (checked ? "enabled" : "disabled"),
-      description: "Your monthly invoicing preference has been updated successfully.",
+      title: "Allergies updated",
+      description: "Your allergies information has been updated successfully.",
     });
-    // In a real implementation, this would update the user's monthly invoice setting
+    // In a real implementation, this would update the user's allergies
   };
   
   const handleLogout = async () => {
@@ -247,17 +262,40 @@ const Profile = () => {
                 Your primary location determines which products are available to you.
               </p>
             </div>
+
+            <div>
+              <Label htmlFor="allergies">Allergies</Label>
+              <Textarea 
+                id="allergies" 
+                placeholder="Enter any food allergies you have, separated by commas..."
+                value={allergies}
+                onChange={handleAllergiesChange}
+                className="mt-1"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Let us know what you're allergic to so we can help you avoid those products.
+              </p>
+            </div>
             
             <div className="flex items-center justify-between border-t pt-4">
-              <div>
+              <div className="flex items-center gap-2">
                 <h3 className="font-medium">Monthly Invoicing</h3>
-                <p className="text-sm text-gray-500">
-                  Enable to add purchases to a monthly invoice instead of paying immediately
-                </p>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">This feature is coming soon! Monthly invoicing will allow you to add purchases to a monthly invoice instead of paying immediately.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <Switch
                 checked={monthlyInvoiceEnabled}
                 onCheckedChange={handleMonthlyInvoiceToggle}
+                disabled={true}
+                className="opacity-60"
               />
             </div>
           </div>

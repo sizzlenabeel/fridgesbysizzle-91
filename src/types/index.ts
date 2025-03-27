@@ -13,6 +13,7 @@ export type User = {
   isAdmin: boolean;
   marketingConsent?: boolean;
   monthlyInvoiceEnabled?: boolean;
+  allergies?: string[];
 };
 
 export type Category = {
